@@ -1,18 +1,22 @@
 "use strict";
 
-import {InitShaderProgram} from './webglfuncs.js';
+import { InitShaderProgram } from './webglfuncs.js';
+import { LookAt, Mat4, Orphographic, Rotate2D } from './matrices.js'
 
 const vertSource = `
 attribute vec3 vertPos;
 attribute vec3 vertColor;
 
 uniform float vertColorMulti;
+uniform mat4 projMat;
+uniform mat4 viewMat;
+uniform mat4 transMat;
 
 varying highp vec3 color;
 varying highp float colorMulti;
 
 void main(){
-    gl_Position = vec4(vertPos, 1);
+    gl_Position = projMat * viewMat * transMat * vec4(vertPos, 1);
     color = vertColor;
     colorMulti = vertColorMulti;
 }`;
@@ -30,7 +34,7 @@ var shaderProgram = null;
 var programInfo = null;
 var buffers = null;
 
-var colorMulti = 0;
+var colorMulti = 0, rotAngle = 0;
 var lastTime = 0, deltaTime = 0;
 
 function setup(){
@@ -55,10 +59,18 @@ function setup(){
             vertColor: webglContext.getAttribLocation(shaderProgram, "vertColor")
         },
         uniforms: {
-            vertColorMulti: webglContext.getUniformLocation(shaderProgram, "vertColorMulti")
+            vertColorMulti: webglContext.getUniformLocation(shaderProgram, "vertColorMulti"),
+            projMat: webglContext.getUniformLocation(shaderProgram, "projMat"),
+            viewMap: webglContext.getUniformLocation(shaderProgram, "viewMat"),
+            transMat: webglContext.getUniformLocation(shaderProgram, "transMat")
         }
     };
 
+    webglContext.useProgram(programInfo.program);
+
+    webglContext.uniformMatrix4fv(programInfo.uniforms.projMat, webglContext.FALSE, Orphographic(window.innerWidth, 0, window.innerHeight, 0, 0.1, 100).mat, 0);
+    webglContext.uniformMatrix4fv(programInfo.uniforms.viewMat, webglContext.FALSE, LookAt([1, 0, 0], [0, 1, 0], [0, 0, 1], [0, 0, -10]).mat, 0);
+    
     buffers = InitBuffers(webglContext);
 
     Draw();
@@ -102,6 +114,9 @@ function Draw(){
     lastTime = currentTime;
     
     colorMulti += deltaTime;
+    rotAngle += deltaTime;
+    if(rotAngle >= 360)
+        rotAngle = 0;
     
     webglContext.clearColor(0.25, 0.25, 0.25, 1.0);
     webglContext.clear(webglContext.COLOR_BUFFER_BIT);
@@ -131,6 +146,8 @@ function Draw(){
     webglContext.useProgram(programInfo.program);
 
     webglContext.uniform1f(programInfo.uniforms.vertColorMulti, Math.abs(colorMulti%2-1));
+
+    webglContext.uniformMatrix4fv(programInfo.uniforms.rotMat, webglContext.FALSE, Rotate2D(new Mat4(), rotAngle).mat, 0);
 
     webglContext.drawArrays(webglContext.TRIANGLE_STRIP, 0, 6);
 
