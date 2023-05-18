@@ -17,10 +17,10 @@ class Mat2{
     ]){ this.mat = mat; }
 
     Transpose(){
-        return[
-            mat[0], mat[2],
-            mat[1], mat[3]
-        ];
+        return new Mat2([
+            this.mat[0], this.mat[2],
+            this.mat[1], this.mat[3]
+        ]);
     }
 }
 class Mat3{
@@ -37,11 +37,11 @@ class Mat3{
     ]){ this.mat = mat; }
 
     Transpose(){
-        return[
-            mat[0], mat[1], mat[2],
-            mat[3], mat[4], mat[5],
-            mat[6], mat[7], mat[8],
-        ]
+        return new Mat3([
+            this.mat[0], this.mat[1], this.mat[2],
+            this.mat[3], this.mat[4], this.mat[5],
+            this.mat[6], this.mat[7], this.mat[8],
+        ]);
     }
 }
 class Mat4{
@@ -60,12 +60,12 @@ class Mat4{
     ]){ this.mat = mat; }
 
     Transpose(){
-        return[
-            mat[0], mat[1], mat[2], mat[3],
-            mat[4], mat[5], mat[6], mat[7],
-            mat[8], mat[9], mat[10], mat[11],
-            mat[12], mat[13], mat[14], mat[15]
-        ];
+        return new Mat4([
+            this.mat[0], this.mat[1], this.mat[2], this.mat[3],
+            this.mat[4], this.mat[5], this.mat[6], this.mat[7],
+            this.mat[8], this.mat[9], this.mat[10], this.mat[11],
+            this.mat[12], this.mat[13], this.mat[14], this.mat[15]
+        ]);
     }
 }
 export { Mat2, Mat3, Mat4 }
@@ -168,57 +168,53 @@ function DeterminantMat4(m){
 }
 export { DeterminantMat2, DeterminantMat3, DeterminantMat4 }
 
-function Rotate2D(mat4, angle){
+function Rotate2D(mat3, angle){
     angle *= degToRad;
-    let rotMat = new Mat4([
-        Math.cos(angle), -Math.sin(angle), 0, 0,
-        Math.sin(angle), Math.cos(angle), 0, 0,
-        0, 0, 1, 0,
-        0, 0, 0, 1
+    let rotMat = new Mat3([
+        Math.cos(angle), -Math.sin(angle), 0,
+        Math.sin(angle), Math.cos(angle), 0,
+        0, 0, 1
     ]);
-    return MulMat4x4(mat4, rotMat);
+    return MulMat3x3(mat3, rotMat);
 }
 function Rotate3D(mat4, rot){
-    let rotMatX = new Mat4([
+    rot.vec[0] *= degToRad;
+    rot.vec[1] *= degToRad;
+    rot.vec[2] *= degToRad;
+
+    let xRotMat = new Mat4([
         1, 0, 0, 0,
         0, Math.cos(rot.vec[0]), -Math.sin(rot.vec[0]), 0,
         0, Math.sin(rot.vec[0]), Math.cos(rot.vec[0]), 0,
         0, 0, 0, 1
     ]);
-    let rotMatY = new Mat4([
+    let yRotMat = new Mat4([
         Math.cos(rot.vec[1]), 0, Math.sin(rot.vec[1]), 0,
         0, 1, 0, 0,
         -Math.sin(rot.vec[1]), 0, Math.cos(rot.vec[1]), 0,
         0, 0, 0, 1
     ]);
-    let rotMatZ = new Mat4([
-        Math.cos(rot.vec[0]), -Math.sin(rot.vec[0]), 0, 0,
-        Math.sin(rot.vec[0]), Math.cos(rot.vec[0]), 0, 0,
+    let zRotMat = new Mat4([
+        Math.cos(rot.vec[2]), -Math.sin(rot.vec[2]), 0, 0,
+        Math.sin(rot.vec[2]), Math.cos(rot.vec[2]), 0, 0,
         0, 0, 1, 0,
         0, 0, 0, 1
     ]);
-
-    return MulMat4x4(mat4, MulMat4x4(rotMatZ, MulMat4x4(rotMatY, rotMatX)));
+    
+    return MulMat4x4(mat4, MulMat4x4(zRotMat, MulMat4x4(yRotMat, xRotMat)));
 }
 export { Rotate2D, Rotate3D }
 
 function ScaleMat3(mat, scale){
-    let scaleMat = new Mat3([
-        scale.vec[0], 0, 0,
-        0, scale.vec[1], 0,
-        0, 0, 1
-    ]);
-
-    return MulMat3x3(mat, scaleMat);
+    mat.mat[0] = scale.vec[0];
+    mat.mat[4] = scale.vec[1];
+    return mat;
 }
 function ScaleMat4(mat, scale){
-    let scaleMat = new Mat4([
-        scale.vec[0], 0, 0, 0,
-        0, scale.vec[1], 0, 0,
-        0, 0, scale.vec[2], 0,
-        0, 0, 0, 1
-    ]);
-    return MulMat4x4(mat, scaleMat);
+    mat.mat[0] = scale.vec[0];
+    mat.mat[5] = scale.vec[1];
+    mat.mat[10] = scale.vec[2];
+    return mat;
 }
 export { ScaleMat3, ScaleMat4 }
 
@@ -243,7 +239,7 @@ function RotateMat4(mat, rot){
     rot.vec[0] *= degToRad;
     rot.vec[1] *= degToRad;
     rot.vec[2] *= degToRad;
-
+    
     let xRotMat = new Mat4([
         1, 0, 0, 0,
         0, Math.cos(rot.vec[0]), -Math.sin(rot.vec[0]), 0,
@@ -257,13 +253,13 @@ function RotateMat4(mat, rot){
         0, 0, 0, 1
     ]);
     let zRotMat = new Mat4([
-        Math.cos(rot.vec[2]), 0, Math.sin(rot.vec[2]), 0,
-        0, 1, 0, 0,
-        -Math.sin(rot.vec[2]), 0, Math.cos(rot.vec[2]), 0,
+        Math.cos(rot.vec[2]), -Math.sin(rot.vec[2]), 0, 0,
+        Math.sin(rot.vec[2]), Math.cos(rot.vec[2]), 0, 0,
+        0, 0, 1, 0,
         0, 0, 0, 1
     ]);
-
-    return MulMat4x4(max, MulMat4x4(xRotMat, MulMat4x4(yRotMat, zRotMat)));
+    
+    return AddMat4x4(mat, MulMat4x4(MulMat4x4(xRotMat, yRotMat), zRotMat));
 }
 export { RotateMat3, RotateMat4 }
 
@@ -286,9 +282,9 @@ function TransformMat3(pos, rot, scale){
     return TranslateMat3(mat, pos);
 }
 function TransformMat4(pos, rot, scale){
-    let mat = ScaleMat3(new Mat4(), scale);
-    mat = RotateMat3(mat, rot);
-    return TranslateMat3(mat, pos);
+    let mat = ScaleMat4(new Mat4(), scale);
+    mat = RotateMat4(mat, rot);
+    return TranslateMat4(mat, pos);
 }
 export { TransformMat3, TransformMat4 }
 
