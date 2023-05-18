@@ -1,7 +1,7 @@
 "use strict";
 
 import { InitShaderProgram } from './webglfuncs.js';
-import { LookAt, Mat4, Orphographic, Rotate2D } from './matrices.js'
+import { LookAt, Mat4, Orphographic, Rotate2D, RotateMat4, TranslateMat4 } from './matrices.js'
 
 const vertSource = `
 attribute vec3 vertPos;
@@ -61,15 +61,17 @@ function setup(){
         uniforms: {
             vertColorMulti: webglContext.getUniformLocation(shaderProgram, "vertColorMulti"),
             projMat: webglContext.getUniformLocation(shaderProgram, "projMat"),
-            viewMap: webglContext.getUniformLocation(shaderProgram, "viewMat"),
+            viewMat: webglContext.getUniformLocation(shaderProgram, "viewMat"),
             transMat: webglContext.getUniformLocation(shaderProgram, "transMat")
         }
     };
 
     webglContext.useProgram(programInfo.program);
 
-    webglContext.uniformMatrix4fv(programInfo.uniforms.projMat, webglContext.FALSE, Orphographic(window.innerWidth, 0, window.innerHeight, 0, 0.1, 100).mat, 0);
-    webglContext.uniformMatrix4fv(programInfo.uniforms.viewMat, webglContext.FALSE, LookAt([1, 0, 0], [0, 1, 0], [0, 0, 1], [0, 0, -10]).mat, 0);
+    webglContext.uniformMatrix4fv(programInfo.uniforms.projMat, webglContext.FALSE, new Mat4(1).mat, 0);
+    webglContext.uniformMatrix4fv(programInfo.uniforms.viewMat, webglContext.FALSE, TranslateMat4(new Mat4(), 0, 0, 0).mat, 0);
+    // webglContext.uniformMatrix4fv(programInfo.uniforms.projMat, webglContext.FALSE, Orphographic(-(window.innerWidth/2), window.innerWidth/2, -(window.innerHeight/2), window.innerHeight/2, 0.1, 100).mat, 0);
+    // webglContext.uniformMatrix4fv(programInfo.uniforms.viewMat, webglContext.FALSE, LookAt([1, 0, 0], [0, 1, 0], [0, 0, 1], [0, 0, -10]).mat, 0);
     
     buffers = InitBuffers(webglContext);
 
@@ -114,9 +116,10 @@ function Draw(){
     lastTime = currentTime;
     
     colorMulti += deltaTime;
-    rotAngle += deltaTime;
+    rotAngle += deltaTime * 5;
     if(rotAngle >= 360)
         rotAngle = 0;
+    console.log(rotAngle)
     
     webglContext.clearColor(0.25, 0.25, 0.25, 1.0);
     webglContext.clear(webglContext.COLOR_BUFFER_BIT);
@@ -147,7 +150,9 @@ function Draw(){
 
     webglContext.uniform1f(programInfo.uniforms.vertColorMulti, Math.abs(colorMulti%2-1));
 
-    webglContext.uniformMatrix4fv(programInfo.uniforms.rotMat, webglContext.FALSE, Rotate2D(new Mat4(), rotAngle).mat, 0);
+    console.log(Rotate2D(new Mat4(), rotAngle));
+    webglContext.uniformMatrix4fv(programInfo.uniforms.transMat, webglContext.FALSE, Rotate2D(new Mat4(), rotAngle).mat, 0);
+    // webglContext.uniformMatrix4fv(programInfo.uniforms.transMat, webglContext.FALSE, RotateMat4(new Mat4(), 0, 0, 0).mat, 0);
 
     webglContext.drawArrays(webglContext.TRIANGLE_STRIP, 0, 6);
 
