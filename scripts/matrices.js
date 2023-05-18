@@ -268,23 +268,15 @@ function RotateMat4(mat, rot){
 export { RotateMat3, RotateMat4 }
 
 function TranslateMat3(mat, pos){
-    let transMat = new Mat3([
-        1, 0, 0,
-        0, 1, 0,
-        pos.vec[0], pos.vec[1], 1
-    ]);
-
-    return MulMat3(mat, transMat);
+    mat.mat[6] = pos.vec[0];
+    mat.mat[7] = pos.vec[1];
+    return mat;
 }
 function TranslateMat4(mat, pos){
-    let transMat = new Mat4([
-        1, 0, 0, 0,
-        0, 1, 0, 0,
-        0, 0, 1, 0,
-        pos.vec[0], pos.vec[1], pos.vec[2], 1
-    ]);
-
-    return MulMat4x4(mat, transMat);
+    mat.mat[12] = pos.vec[0];
+    mat.mat[13] = pos.vec[1];
+    mat.mat[14] = pos.vec[2];
+    return mat;
 }
 export { TranslateMat3, TranslateMat4 }
 
