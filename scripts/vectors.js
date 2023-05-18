@@ -3,9 +3,9 @@
 class Vec2{ 
     vec = [0, 0];
 
-    constructor(x, y){
-        vec[0] = x;
-        vec[1] = y;
+    constructor(x = 0, y = 0){
+        this.vec[0] = x;
+        this.vec[1] = y;
     }
 
     Normalized(){
@@ -16,10 +16,10 @@ class Vec2{
 class Vec3{
     vec = [0, 0, 0];
 
-    constructor(x, y, z){
-        vec[0] = x;
-        vec[1] = y;
-        vec[2] = z;
+    constructor(x = 0, y = 0, z = 0){
+        this.vec[0] = x;
+        this.vec[1] = y;
+        this.vec[2] = z;
     }
 
     Normalized(){
@@ -30,15 +30,15 @@ class Vec3{
 class Vec4{
     vec = [0, 0, 0, 0];
 
-    constructor(x, y, z, w){
-        vec[0] = x;
-        vec[1] = y;
-        vec[2] = z;
-        vec[3] = w;
+    constructor(x = 0, y = 0, z = 0, w = 0){
+        this.vec[0] = x;
+        this.vec[1] = y;
+        this.vec[2] = z;
+        this.vec[3] = w;
     }
 
     Normalized(){
-        let m = Math.max(Math.max(x, y), Math.max(z, 2));
+        let m = Math.max(Math.max(x, y), Math.max(z, w));
         return new Vec2(x/m, y/m, z/m, w/m);
     }
 }
