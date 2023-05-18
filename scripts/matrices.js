@@ -9,21 +9,23 @@ class Mat2{
     mat = [
         1, 0,
         0, 1
-    ]
+    ];
 
-    // Mat(){ }
-    Mat(i = 1){
+    constructor(i = 1){
         mat = [
             i, 0,
             0, i
-        ]
+        ];
+    }
+    constructor(mat){
+        this.mat = mat;
     }
 
     Transpose(){
         return[
             mat[0], mat[2],
             mat[1], mat[3]
-        ]
+        ];
     }
 }
 class Mat3{
@@ -33,13 +35,15 @@ class Mat3{
         0, 0, 1
     ];
 
-    // Mat(){ }
-    Mat(i = 1){
+    constructor(i = 1){
         mat = [
             i, 0, 0,
             0, i, 0,
             0, 0, i
         ];
+    }
+    constructor(mat){
+        this.mat = mat;
     }
 
     Transpose(){
@@ -58,14 +62,16 @@ class Mat4{
         0, 0, 0, 1
     ];
 
-    // Mat(){ }
-    Mat(i = 1){
+    constructor(i = 1){
         mat = [
             i, 0, 0, 0,
             0, i, 0, 0,
             0, 0, i, 0,
             0, 0, 0, i
         ];
+    }
+    constructor(mat){
+        this.mat = mat;
     }
 
     Transpose(){
@@ -74,7 +80,7 @@ class Mat4{
             mat[4], mat[5], mat[6], mat[7],
             mat[8], mat[9], mat[10], mat[11],
             mat[12], mat[13], mat[14], mat[15]
-        ]
+        ];
     }
 }
 export { Mat2, Mat3, Mat4 }
@@ -245,6 +251,10 @@ function RotateMat3(mat, x, y){
     return MulMat3x3(mat, rotMat);
 }
 function RotateMat4(mat, x, y, z){
+    x *= degToRad;
+    y *= degToRad;
+    z *= degToRad;
+
     let rotMat = new Mat4();
     rotMat.mat[0] = Math.cos(y) + Math.cos(z);
     rotMat.mat[1] = -Math.sin(z);
@@ -277,7 +287,7 @@ function RotateMat4(mat, x, y, z){
     let rotMat = AddMat4x4(xMat, AddMat4x4(yMat, zMat));
     return MulMat4x4(mat, rotMat);
     */
-   return MulMat4x4(mat, rotMat);
+   return rotMat;
 }
 export { RotateMat3, RotateMat4 }
 

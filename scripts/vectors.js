@@ -1,8 +1,12 @@
 "use strict";
 
-class Vec2{
+class Vec2{ 
     vec = [0, 0];
 
+    constructor(i){
+        vec[0] = i;
+        vec[1] = i;
+    }
     constructor(x, y){
         vec[0] = x;
         vec[1] = y;
@@ -16,6 +20,11 @@ class Vec2{
 class Vec3{
     vec = [0, 0, 0];
 
+    constructor(i){
+        vec[0] = i;
+        vec[1] = i;
+        vec[2] = i;
+    }
     constructor(x, y, z){
         vec[0] = x;
         vec[1] = y;
@@ -30,6 +39,12 @@ class Vec3{
 class Vec4{
     vec = [0, 0, 0, 0];
 
+    constructor(i){
+        vec[0] = i;
+        vec[1] = i;
+        vec[2] = i;
+        vec[3] = i;
+    }
     constructor(x, y, z, w){
         vec[0] = x;
         vec[1] = y;
