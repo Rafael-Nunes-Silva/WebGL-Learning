@@ -1,7 +1,7 @@
 "use strict";
 
 import { InitShaderProgram } from "./webglfuncs.js";
-import { Mat4, Rotate2D, Rotate3D } from "./matrices.js";
+import { Mat4, Rotate2D, Rotate3D, TranslateMat4 } from "./matrices.js";
 import { Vec3 } from "./vectors.js";
 
 const vertSource = `
@@ -141,7 +141,9 @@ function Draw(){
 
     webglContext.uniform1f(programInfo.uniforms.vertColorMulti, Math.abs(colorMulti%2-1));
 
-    webglContext.uniformMatrix4fv(programInfo.uniforms.transMat, webglContext.FALSE, Rotate2D(new Mat4(), rotAngle).mat, 0);
+    let transMat = TranslateMat4(new Mat4(), new Vec3(1, 0, 0)); // TransformMat4(new Vec3(0.5, 0.5, 0.0), new Vec3(0, 0, 45), new Vec3(1.5, 0.5, 0.0));
+
+    webglContext.uniformMatrix4fv(programInfo.uniforms.transMat, webglContext.FALSE, transMat.mat, 0);
     // webglContext.uniformMatrix4fv(programInfo.uniforms.transMat, webglContext.FALSE, Rotate3D(new Mat4(), [0, 0, 0]).mat, 0);
 
     webglContext.drawArrays(webglContext.TRIANGLE_STRIP, 0, 6);
