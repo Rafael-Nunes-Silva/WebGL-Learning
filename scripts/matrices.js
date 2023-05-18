@@ -11,15 +11,10 @@ class Mat2{
         0, 1
     ];
 
-    constructor(i = 1){
-        mat = [
-            i, 0,
-            0, i
-        ];
-    }
-    constructor(mat){
-        this.mat = mat;
-    }
+    constructor(mat = [
+        1, 0,
+        0, 1
+    ]){ this.mat = mat; }
 
     Transpose(){
         return[
@@ -35,16 +30,11 @@ class Mat3{
         0, 0, 1
     ];
 
-    constructor(i = 1){
-        mat = [
-            i, 0, 0,
-            0, i, 0,
-            0, 0, i
-        ];
-    }
-    constructor(mat){
-        this.mat = mat;
-    }
+    constructor(mat = [
+        1, 0, 0,
+        0, 1, 0,
+        0, 0, 1
+    ]){ this.mat = mat; }
 
     Transpose(){
         return[
@@ -62,17 +52,12 @@ class Mat4{
         0, 0, 0, 1
     ];
 
-    constructor(i = 1){
-        mat = [
-            i, 0, 0, 0,
-            0, i, 0, 0,
-            0, 0, i, 0,
-            0, 0, 0, i
-        ];
-    }
-    constructor(mat){
-        this.mat = mat;
-    }
+    constructor(mat = [
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+    ]){ this.mat = mat; }
 
     Transpose(){
         return[
@@ -86,83 +71,71 @@ class Mat4{
 export { Mat2, Mat3, Mat4 }
 
 function AddMat2x2(m1, m2){
-    let retMat = new Mat2();
-    retMat.mat = [
+    return new Mat2([
         m1.mat[0] + m2.mat[0], m1.mat[1] * m2.mat[1],
         m1.mat[2] + m2.mat[2], m1.mat[3] * m2.mat[3]
-    ];
-    return retMat;
+    ]);
 }
 function AddMat3x3(m1, m2){
-    let retMat = new Mat3();
-    retMat.mat = [
+    return new Mat3([
         m1.mat[0] + m2.mat[0], m1.mat[1] + m2.mat[1], m1.mat[2] + m2.mat[2],
         m1.mat[3] + m2.mat[3], m1.mat[4] + m2.mat[4], m1.mat[5] + m2.mat[5],
         m1.mat[6] + m2.mat[6], m1.mat[7] + m2.mat[7], m1.mat[8] + m2.mat[8],
-    ];
-    return retMat;
+    ]);
 }
 function AddMat4x4(m1, m2){
-    let retMat = new Mat4();
-    retMat.mat = [
+    return new Mat4([
         m1.mat[0] + m2.mat[0], m1.mat[1] + m2.mat[1], m1.mat[2] + m2.mat[2], m1.mat[3] + m2.mat[3],
         m1.mat[4] + m2.mat[4], m1.mat[5] + m2.mat[5], m1.mat[6] + m2.mat[6], m1.mat[7] + m2.mat[7],
         m1.mat[8] + m2.mat[8], m1.mat[9] + m2.mat[9], m1.mat[10] + m2.mat[10], m1.mat[11] + m2.mat[11],
         m1.mat[12] + m2.mat[12], m1.mat[13] + m2.mat[13], m1.mat[14] + m2.mat[14], m1.mat[15] + m2.mat[15]
-    ];
-    return retMat;
+    ]);
 }
 export { AddMat2x2, AddMat3x3, AddMat4x4 }
 
 function SubMat2x2(m1, m2){
-    return [
+    return new Mat2([
         m1.mat[0] - m2.mat[0], m1.mat[1] - m2.mat[1],
         m1.mat[2] - m2.mat[2], m1.mat[3] - m2.mat[3]
-    ];
+    ]);
 }
 function SubMat3x3(m1, m2){
-    return [
+    return new Mat2([
         m1.mat[0] - m2.mat[0], m1.mat[1] - m2.mat[1], m1.mat[2] - m2.mat[2],
         m1.mat[3] - m2.mat[3], m1.mat[4] - m2.mat[4], m1.mat[5] - m2.mat[5],
         m1.mat[6] - m2.mat[6], m1.mat[7] - m2.mat[7], m1.mat[8] - m2.mat[8],
-    ];
+    ]);
 }
 function SubMat4x4(m1, m2){
-    return [
+    return new Mat2([
         m1.mat[0] - m2.mat[0], m1.mat[1] - m2.mat[1], m1.mat[2] - m2.mat[2], m1.mat[3] - m2.mat[3],
         m1.mat[4] - m2.mat[4], m1.mat[5] - m2.mat[5], m1.mat[6] - m2.mat[6], m1.mat[7] - m2.mat[7],
         m1.mat[8] - m2.mat[8], m1.mat[9] - m2.mat[9], m1.mat[10] - m2.mat[10], m1.mat[11] - m2.mat[11],
         m1.mat[12] - m2.mat[12], m1.mat[13] - m2.mat[13], m1.mat[14] - m2.mat[14], m1.mat[15] - m2.mat[15]
-    ];
+    ]);
 }
 export { SubMat2x2, SubMat3x3, SubMat4x4 }
 
 function MulMat2x2(m1, m2){
-    let retMat = new Mat2();
-    retMat.mat = [
+    return new Mat2([
         m1.mat[0] * m2.mat[0], m1.mat[1] * m2.mat[2],
         m1.mat[2] * m2.mat[1], m1.mat[3] * m2.mat[3]
-    ];
-    return retMat;
+    ]);
 }
 function MulMat3x3(m1, m2){
-    let retMat = new Mat3();
-    retMat.mat = [
+    return new Mat3([
         m1.mat[0] * m2.mat[0], m1.mat[1] * m2.mat[3], m1.mat[2] * m2.mat[6],
         m1.mat[3] * m2.mat[1], m1.mat[4] * m2.mat[4], m1.mat[5] * m2.mat[7],
         m1.mat[6] * m2.mat[2], m1.mat[7] * m2.mat[5], m1.mat[8] * m2.mat[8],
-    ];
-    return retMat;
+    ]);
 }
 function MulMat4x4(m1, m2){
-    let retMat = new Mat4();
-    retMat.mat = [
+    return new Mat4([
         m1.mat[0] * m2.mat[0], m1.mat[1] * m2.mat[4], m1.mat[2] * m2.mat[8], m1.mat[3] * m2.mat[12],
         m1.mat[4] * m2.mat[1], m1.mat[5] * m2.mat[5], m1.mat[6] * m2.mat[9], m1.mat[7] * m2.mat[13],
         m1.mat[8] * m2.mat[2], m1.mat[9] * m2.mat[6], m1.mat[10] * m2.mat[10], m1.mat[11] * m2.mat[14],
         m1.mat[12] * m2.mat[3], m1.mat[13] * m2.mat[7], m1.mat[14] * m2.mat[11], m1.mat[15] * m2.mat[15]
-    ];
-    return retMat;
+    ]);
 }
 export { MulMat2x2, MulMat3x3, MulMat4x4 }
 
@@ -205,6 +178,29 @@ function Rotate2D(mat4, angle){
     return mat4;
 }
 function Rotate3D(mat4, vec3){
+    let rotMatX = new Mat4([
+        1, 0, 0, 0,
+        0, Math.cos(vec3.x), -Math.sin(vec3.x), 0,
+        0, Math.sin(vec3.x), Math.cos(vec3.x), 0,
+        0, 0, 0, 1
+    ]);
+    let rotMatY = new Mat4([
+        Math.cos(vec3.y), 0, Math.sin(vec3.y), 0,
+        0, 1, 0, 0,
+        -Math.sin(vec3.y), 0, Math.cos(vec3.y), 0,
+        0, 0, 0, 1
+    ]);
+    let rotMatZ = new Mat4([
+        Math.cos(vec3.x), -Math.sin(vec3.x), 0, 0,
+        Math.sin(vec3.x), Math.cos(vec3.x), 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1
+    ]);
+
+    return MulMat4x4(rotMatZ, MulMat4x4(rotMatY, rotMatX));
+
+    MulMat4x4(rotMatX, MulMat4x4(rotMatY, rotMatZ))
+
     mat4.mat[0] = Math.cos(vec3[1]) * Math.cos(vec3[2]);
     mat4.mat[1] = -Math.sin(vec3[2]);
     mat4.mat[2] = Math.sin(vec3[1]);
