@@ -1,7 +1,7 @@
 "use strict";
 
 import { InitShaderProgram } from "./webglfuncs.js";
-import { Mat4, RotateMat4, TransformMat4 } from "./matrices.js";
+import { TransformMat4 } from "./matrices.js";
 import { Vec3 } from "./vectors.js";
 
 const vertSource = `
@@ -139,22 +139,10 @@ function Draw(){
 
     webglContext.useProgram(programInfo.program);
 
-    webglContext.uniform1f(programInfo.uniforms.vertColorMulti, Math.abs(colorMulti%2-1));
+    webglContext.uniform1f(programInfo.uniforms.vertColorMulti, Math.abs(colorMulti % 2 - 1));
 
-    // let transMat = TranslateMat4(new Mat4(), new Vec3(0.5, 0, 0));
-    // let transMat = TransformMat4(new Vec3(0.0, 0.0, 0.0), new Vec3(0, 0, rotAngle), new Vec3(1, 1.5, 0.0));
-    /*
-    let transMat = ScaleMat4(new Mat4(), new Vec3(1, 1, 1)); // new Vec3(0.5, 1.5, 0.0));
-    transMat = RotateMat4(transMat, new Vec3(0, 0, 45));
-    //*/
-
-    let transMat = RotateMat4(new Mat4(), new Vec3(0, 0, rotAngle));
-
-    console.log(transMat);
-
-    webglContext.uniformMatrix4fv(programInfo.uniforms.transMat, webglContext.FALSE, transMat.mat, 0);
-    // webglContext.uniformMatrix4fv(programInfo.uniforms.transMat, webglContext.FALSE, Rotate3D(new Mat4(), [0, 0, 0]).mat, 0);
-
+    webglContext.uniformMatrix4fv(programInfo.uniforms.transMat, webglContext.FALSE, TransformMat4(new Vec3(0.0, 0.0, 0.0), new Vec3(0, 0, rotAngle), new Vec3(1.0, 1.0, 0.0)).mat, 0);
+ 
     webglContext.drawArrays(webglContext.TRIANGLE_STRIP, 0, 6);
 
     requestAnimationFrame(Draw);
