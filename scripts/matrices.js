@@ -1,4 +1,5 @@
 "use strict";
+
 import { Vec2, Vec3 } from "./vectors.js"
 
 const degToRad = Math.PI / 180;
@@ -310,46 +311,61 @@ function TransformMat3(pos, rot, scale){
 }
 function TransformMat4(pos, rot, scale){
     let mat = ScaleMat4(new Mat4(), scale);
-    console.log("scaled:");
-    console.log(mat);
     mat = RotateMat4(mat, rot);
-    console.log("rotated:");
-    console.log(mat);
     return TranslateMat4(mat, pos);
 }
 export { TransformMat3, TransformMat4 }
 
 function Perspective(width, height, near, far, fov){
     fov *= degToRad;
-    let mat4 = new Mat4();
-    mat4.mat = [
-        1/((width/height)*Math.tan(fov/2)), 0, 0, 0,
-        0, 1/Math.tan(fov/2), 0, 0,
-        0, 0, -((far+near)/(far-near)), -((2*far*near)/(far-near)),
-        0, 0, -1, 0
-    ];
-    return mat4;
+    return new Mat4([
+        1 / ((width/height) * Math.tan(fov/2)), 0, 0, 0,
+        0, 1 / Math.tan(fov/2), 0, 0,
+        0, 0, -((far+near) / (far-near)), -((2*far*near) / (far-near)),
+        0, 0, -1, 1
+    ]);
 }
 function Orphographic(right, left, top, bottom, near, far){
-    let mat4 = new Mat4();
-    mat4.mat = [
+    return new Mat4([
         2/(right-left), 0, 0, -((right+left)/(right-left)),
         0, 2/(top-bottom), 0, -((top+bottom)/(top-bottom)),
         0, 0, -2/(far-near), -((far+near)/(far-near)),
         0, 0, 0, 1
-    ];
-    return mat4;
+    ]);
 }
 export { Perspective, Orphographic }
 
 function LookAt(right, up, front, position){
-    let mat4 = new Mat4();
-    mat4.mat = [
+    // return new Mat4();
+    /*
+    return new Mat4([
+        right[0], right[1], right[2], 0,
+        up[0], up[1], up[2], 0,
+        -front[0], -front[1], -front[2], 0,
+        position[0], position[1], position[2], 1
+    ]);
+    */
+    /*
+    return new Mat4([
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1 // -position[0], -position[1], -position[2], 1
+    ]);
+    */
+   /*
+    return new Mat4([
+        -right[0], -up[0], -front[0], 0,
+        -right[1], -up[1], -front[1], 0,
+        -right[2], -up[2], -front[2], 0,
+        position[0], position[1], position[2], 1
+    ]);
+    */
+    return new Mat4([
         -right[0], -right[1], -right[2], 0,
         -up[0], -up[1], -up[2], 0,
         -front[0], -front[1], -front[2], 0,
         position[0], position[1], position[2], 1
-    ];
-    return mat4;
+    ]);
 }
 export { LookAt }

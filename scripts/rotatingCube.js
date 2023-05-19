@@ -2,7 +2,7 @@
 
 import { InitShaderProgram } from './webglfuncs.js';
 import { Vec3 } from './vectors.js';
-import { Mat4, Perspective } from './matrices.js';
+import { Perspective, TransformMat4 } from './matrices.js';
 
 const vertSource = `
 attribute vec3 vertPos;
@@ -10,10 +10,10 @@ attribute vec3 vertColor;
 
 varying highp vec3 color;
 
-uniform highp mat4 projMat, viewMat, transMat;
+uniform highp mat4 projMat, transMat;
 
 void main(){
-    gl_Position = projMat * viewMat * transMat * vec4(vertPos, 1);
+    gl_Position = projMat * transMat * vec4(vertPos, 1);
     color = vertColor;
 }`;
 
@@ -29,6 +29,7 @@ var shaderProgram = null;
 var programInfo = null;
 var buffers = null;
 
+var rotAngle = 0;
 var lastTime = 0, deltaTime = 0;
 
 function setup(){
@@ -123,52 +124,52 @@ function InitBuffers(context){
     context.bindBuffer(context.ARRAY_BUFFER, colorBuffer);
     const colors = [
         // front-face
-        0, 0, 0,
-        0, 1, 0,
-        1, 0, 0,
-        0, 1, 0,
-        1, 1, 0,
-        1, 0, 0,
+        0, 0, 1,
+        0, 0, 1,
+        0, 0, 1,
+        0, 0, 1,
+        0, 0, 1,
+        0, 0, 1,
 
         // right-face
         1, 0, 0,
-        1, 1, 0,
-        1, 0, 1,
-        1, 1, 0,
-        1, 1, 1,
-        1, 0, 1,
+        1, 0, 0,
+        1, 0, 0,
+        1, 0, 0,
+        1, 0, 0,
+        1, 0, 0,
 
         // back-face
         1, 0, 1,
-        1, 1, 1,
-        0, 0, 1,
-        1, 1, 1,
-        0, 1, 1,
-        0, 0, 1,
+        1, 0, 1,
+        1, 0, 1,
+        1, 0, 1,
+        1, 0, 1,
+        1, 0, 1,
 
         // left-face
-        0, 0, 1,
-        0, 1, 1,
-        0, 0, 0,
-        0, 1, 1,
-        0, 1, 0,
-        0, 0, 0,
+        1, 1, 0,
+        1, 1, 0,
+        1, 1, 0,
+        1, 1, 0,
+        1, 1, 0,
+        1, 1, 0,
 
         // top-face
         0, 1, 0,
-        0, 1, 1,
-        1, 1, 0,
-        0, 1, 1,
-        1, 1, 1,
-        1, 1, 0,
+        0, 1, 0,
+        0, 1, 0,
+        0, 1, 0,
+        0, 1, 0,
+        0, 1, 0,
 
         // bottom-face
-        0, 0, 1,
-        0, 0, 0,
-        1, 0, 1,
-        0, 0, 0,
-        1, 0, 0,
-        1, 0, 1
+        0, 1, 1,
+        0, 1, 1,
+        0, 1, 1,
+        0, 1, 1,
+        0, 1, 1,
+        0, 1, 1
     ];
     context.bufferData(context.ARRAY_BUFFER, new Float32Array(colors), context.STATIC_DRAW);
     
@@ -182,6 +183,10 @@ function Draw(){
     let currentTime = new Date().getTime() * 0.001;
     deltaTime = currentTime - lastTime;
     lastTime = currentTime;
+
+    rotAngle += deltaTime * 10;
+    if(rotAngle >= 360)
+        rotAngle = 0;
     
     webglContext.clearColor(0.25, 0.25, 0.25, 1.0);
     webglContext.clear(webglContext.COLOR_BUFFER_BIT);
@@ -210,9 +215,9 @@ function Draw(){
 
     webglContext.useProgram(programInfo.program);
 
-    webglContext.uniform1fv(programInfo.uniforms.projMat, Perspective(window.innerWidth, window.innerHeight, 0.1, 100, 90));
-    webglContext.uniform1fv(programInfo.uniforms.viewMat, new Mat4());
-    webglContext.uniform1fv(programInfo.uniforms.transMat, new Mat4());
+    webglContext.enable(webglContext.DEPTH_TEST);
+    webglContext.uniformMatrix4fv(programInfo.uniforms.projMat, webglContext.FALSE, Perspective(window.innerWidth, window.innerHeight, 0, 1000, 90).mat);
+    webglContext.uniformMatrix4fv(programInfo.uniforms.transMat, webglContext.FALSE, TransformMat4(new Vec3(0, 0, -1), new Vec3(rotAngle, rotAngle*2, rotAngle*3), new Vec3(1, 1, 1)).mat);
 
     webglContext.drawArrays(webglContext.TRIANGLE_STRIP, 0, 36);
 
