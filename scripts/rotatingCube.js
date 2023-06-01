@@ -35,7 +35,7 @@ var lastTime = 0, deltaTime = 0;
 function setup(){
     const canvas = document.getElementById("webglCanvas");
     canvas.setAttribute("width", window.innerWidth);
-    canvas.setAttribute("height", window.innerHeight);
+    canvas.setAttribute("height", window.innerHeight - 180);
 
     webglContext = canvas.getContext("webgl");
 
