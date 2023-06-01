@@ -108,7 +108,7 @@ function Draw(){
     lastTime = currentTime;
     
     colorMulti += deltaTime;
-    rotAngle += deltaTime * 5;
+    rotAngle += deltaTime * 20;
     if(rotAngle >= 360)
         rotAngle = 0;
     
