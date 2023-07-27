@@ -1,6 +1,6 @@
 "use strict";
 
-import {InitShaderProgram} from './webglfuncs.js';
+import { InitShaderProgram } from './utils/webglfuncs.js';
 
 const vertSource = `
 attribute vec3 vertPos;
@@ -33,37 +33,39 @@ var buffers = null;
 var colorMulti = 0;
 var lastTime = 0, deltaTime = 0;
 
-function setup(){
-    const canvas = document.getElementById("webglCanvas");
-    canvas.setAttribute("width", window.innerWidth);
-    canvas.setAttribute("height", window.innerHeight);
+window.addEventListener(
+    "load",
+    function setup(){
+        const canvas = document.getElementById("webglCanvas");
+        canvas.setAttribute("width", window.innerWidth);
+        canvas.setAttribute("height", window.innerHeight);
 
-    webglContext = canvas.getContext("webgl");
+        webglContext = canvas.getContext("webgl");
 
-    if(webglContext === null){
-        alert("WebGL not available.");
-        return;
-    }
-
-    shaderProgram = InitShaderProgram(webglContext, vertSource, fragSource);
-
-    webglContext.useProgram(shaderProgram);
-    programInfo = {
-        program: shaderProgram,
-        attributes: {
-            vertPos: webglContext.getAttribLocation(shaderProgram, "vertPos"),
-            vertColor: webglContext.getAttribLocation(shaderProgram, "vertColor")
-        },
-        uniforms: {
-            vertColorMulti: webglContext.getUniformLocation(shaderProgram, "vertColorMulti")
+        if(webglContext === null){
+            alert("WebGL not available.");
+            return;
         }
-    };
 
-    buffers = InitBuffers(webglContext);
+        shaderProgram = InitShaderProgram(webglContext, vertSource, fragSource);
 
-    Draw();
-}
-window.setup = setup;
+        webglContext.useProgram(shaderProgram);
+        programInfo = {
+            program: shaderProgram,
+            attributes: {
+                vertPos: webglContext.getAttribLocation(shaderProgram, "vertPos"),
+                vertColor: webglContext.getAttribLocation(shaderProgram, "vertColor")
+            },
+            uniforms: {
+                vertColorMulti: webglContext.getUniformLocation(shaderProgram, "vertColorMulti")
+            }
+        };
+
+        buffers = InitBuffers(webglContext);
+
+        Draw();
+    }
+);
 
 function InitBuffers(context){
     const positionBuffer = context.createBuffer();

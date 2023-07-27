@@ -1,8 +1,8 @@
 "use strict";
 
-import { InitShaderProgram } from "./webglfuncs.js";
-import { TransformMat4 } from "./matrices.js";
-import { Vec3 } from "./vectors.js";
+import { InitShaderProgram } from "./utils/webglfuncs.js";
+import { TransformMat4 } from "./utils/matrices.js";
+import { Vec3 } from "./utils/vectors.js";
 
 const vertSource = `
 attribute vec3 vertPos;
@@ -36,40 +36,42 @@ var buffers = null;
 var colorMulti = 0, rotAngle = 0;
 var lastTime = 0, deltaTime = 0;
 
-function setup(){
-    const canvas = document.getElementById("webglCanvas");
-    canvas.setAttribute("width", window.innerWidth);
-    canvas.setAttribute("height", window.innerHeight);
+window.addEventListener(
+    "load",
+    function setup(){
+        const canvas = document.getElementById("webglCanvas");
+        canvas.setAttribute("width", window.innerWidth);
+        canvas.setAttribute("height", window.innerHeight);
 
-    webglContext = canvas.getContext("webgl");
+        webglContext = canvas.getContext("webgl");
 
-    if(webglContext === null){
-        alert("WebGL not available.");
-        return;
-    }
-
-    shaderProgram = InitShaderProgram(webglContext, vertSource, fragSource);
-
-    webglContext.useProgram(shaderProgram);
-    programInfo = {
-        program: shaderProgram,
-        attributes: {
-            vertPos: webglContext.getAttribLocation(shaderProgram, "vertPos"),
-            vertColor: webglContext.getAttribLocation(shaderProgram, "vertColor")
-        },
-        uniforms: {
-            vertColorMulti: webglContext.getUniformLocation(shaderProgram, "vertColorMulti"),
-            transMat: webglContext.getUniformLocation(shaderProgram, "transMat")
+        if(webglContext === null){
+            alert("WebGL not available.");
+            return;
         }
-    };
 
-    webglContext.useProgram(programInfo.program);
-    
-    buffers = InitBuffers(webglContext);
+        shaderProgram = InitShaderProgram(webglContext, vertSource, fragSource);
 
-    Draw();
-}
-window.setup = setup;
+        webglContext.useProgram(shaderProgram);
+        programInfo = {
+            program: shaderProgram,
+            attributes: {
+                vertPos: webglContext.getAttribLocation(shaderProgram, "vertPos"),
+                vertColor: webglContext.getAttribLocation(shaderProgram, "vertColor")
+            },
+            uniforms: {
+                vertColorMulti: webglContext.getUniformLocation(shaderProgram, "vertColorMulti"),
+                transMat: webglContext.getUniformLocation(shaderProgram, "transMat")
+            }
+        };
+
+        webglContext.useProgram(programInfo.program);
+        
+        buffers = InitBuffers(webglContext);
+
+        Draw();
+    }
+);
 
 function InitBuffers(context){
     const positionBuffer = context.createBuffer();
@@ -141,7 +143,16 @@ function Draw(){
 
     webglContext.uniform1f(programInfo.uniforms.vertColorMulti, Math.abs(colorMulti % 2 - 1));
 
-    webglContext.uniformMatrix4fv(programInfo.uniforms.transMat, webglContext.FALSE, TransformMat4(new Vec3(0.0, 0.0, 0.0), new Vec3(0, 0, rotAngle), new Vec3(1.0, 1.0, 0.0)).mat, 0);
+    webglContext.uniformMatrix4fv(
+        programInfo.uniforms.transMat,
+        webglContext.FALSE,
+        TransformMat4(
+            new Vec3(0.0, 0.0, 0.0),
+            new Vec3(0, 0, rotAngle),
+            new Vec3(1.0, 1.0, 0.0)
+        ).mat,
+        0
+    );
  
     webglContext.drawArrays(webglContext.TRIANGLE_STRIP, 0, 6);
 

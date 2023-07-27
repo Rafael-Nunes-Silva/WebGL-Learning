@@ -1,8 +1,8 @@
 "use strict";
 
-import { InitShaderProgram } from './webglfuncs.js';
-import { Vec3 } from './vectors.js';
-import { Perspective, TransformMat4 } from './matrices.js';
+import { InitShaderProgram } from './utils/webglfuncs.js';
+import { Vec3 } from './utils/vectors.js';
+import { Perspective, TransformMat4 } from './utils/matrices.js';
 
 const vertSource = `
 attribute vec3 vertPos;
@@ -32,39 +32,41 @@ var buffers = null;
 var rotAngle = 0;
 var lastTime = 0, deltaTime = 0;
 
-function setup(){
-    const canvas = document.getElementById("webglCanvas");
-    canvas.setAttribute("width", window.innerWidth);
-    canvas.setAttribute("height", window.innerHeight);
+window.addEventListener(
+    "load",
+    function setup(){
+        const canvas = document.getElementById("webglCanvas");
+        canvas.setAttribute("width", window.innerWidth);
+        canvas.setAttribute("height", window.innerHeight);
 
-    webglContext = canvas.getContext("webgl");
+        webglContext = canvas.getContext("webgl");
 
-    if(webglContext === null){
-        alert("WebGL not available.");
-        return;
-    }
-
-    shaderProgram = InitShaderProgram(webglContext, vertSource, fragSource);
-
-    webglContext.useProgram(shaderProgram);
-    programInfo = {
-        program: shaderProgram,
-        attributes: {
-            vertPos: webglContext.getAttribLocation(shaderProgram, "vertPos"),
-            vertColor: webglContext.getAttribLocation(shaderProgram, "vertColor")
-        },
-        uniforms: {
-            projMat: webglContext.getUniformLocation(shaderProgram, "projMat"),
-            viewMat: webglContext.getUniformLocation(shaderProgram, "viewMat"),
-            transMat: webglContext.getUniformLocation(shaderProgram, "transMat")
+        if(webglContext === null){
+            alert("WebGL not available.");
+            return;
         }
-    };
 
-    buffers = InitBuffers(webglContext);
+        shaderProgram = InitShaderProgram(webglContext, vertSource, fragSource);
 
-    Draw();
-}
-window.setup = setup;
+        webglContext.useProgram(shaderProgram);
+        programInfo = {
+            program: shaderProgram,
+            attributes: {
+                vertPos: webglContext.getAttribLocation(shaderProgram, "vertPos"),
+                vertColor: webglContext.getAttribLocation(shaderProgram, "vertColor")
+            },
+            uniforms: {
+                projMat: webglContext.getUniformLocation(shaderProgram, "projMat"),
+                viewMat: webglContext.getUniformLocation(shaderProgram, "viewMat"),
+                transMat: webglContext.getUniformLocation(shaderProgram, "transMat")
+            }
+        };
+
+        buffers = InitBuffers(webglContext);
+
+        Draw();
+    }
+);
 
 function InitBuffers(context){
     const verticeBuffer = context.createBuffer();
@@ -216,8 +218,26 @@ function Draw(){
     webglContext.useProgram(programInfo.program);
 
     webglContext.enable(webglContext.DEPTH_TEST);
-    webglContext.uniformMatrix4fv(programInfo.uniforms.projMat, webglContext.FALSE, Perspective(window.innerWidth, window.innerHeight, 0, 1000, 90).mat);
-    webglContext.uniformMatrix4fv(programInfo.uniforms.transMat, webglContext.FALSE, TransformMat4(new Vec3(0, 0, -1), new Vec3(rotAngle, rotAngle*2, rotAngle*3), new Vec3(1, 1, 1)).mat);
+    webglContext.uniformMatrix4fv(
+        programInfo.uniforms.projMat,
+        webglContext.FALSE,
+        Perspective(
+            window.innerWidth,
+            window.innerHeight,
+            0,
+            1000,
+            90
+        ).mat
+    );
+    webglContext.uniformMatrix4fv(
+        programInfo.uniforms.transMat,
+        webglContext.FALSE,
+        TransformMat4(
+            new Vec3(0, 0, -1),
+            new Vec3(rotAngle, rotAngle*2, rotAngle*3),
+            new Vec3(1, 1, 1)
+        ).mat
+    );
 
     webglContext.drawArrays(webglContext.TRIANGLE_STRIP, 0, 36);
 
