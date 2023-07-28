@@ -1,10 +1,9 @@
 "use strict";
 
 import { Shader } from '../utils/shader.js';
-import { Renderable } from '../utils/renderable.js';
-import { Particle, ParticleType } from './particle.js';
+import { Particle } from './particle.js';
 
-import { Vec2, Vec3 } from '../utils/vectors.js';
+import { Vec2, Vec3, AddVec3 } from '../utils/vectors.js';
 import { Mat4, Orthographic, TransformMat4 } from '../utils/matrices.js';
 
 const vertSource = `
@@ -27,32 +26,12 @@ void main(){
     gl_FragColor = vec4(color, 1);
 }`;
 
-const vertices = [
-    -0.5, -0.5, 0.0,
-    -0.5, 0.5, 0.0,
-    0.5, 0.5, 0.0,
-    0.5, -0.5, 0.0
-];
-const colors = [
-    0.0, 0.0, 0.0,
-    0.0, 0.0, 0.0,
-    0.0, 0.0, 0.0,
-    0.0, 0.0, 0.0,
-];
-
-/*
 var webglContext = null;
-var shaderProgram = null;
-var programInfo = null;
-var buffers = null;
-*/
 
-// var lastTime = 0, deltaTime = 0;
-
-var resolution = new Vec2(10, 10); //new Vec2(1280, 720);
+var resolution = new Vec2(128, 72);
 var projMat =  Orthographic(
-    0.8 * resolution.vec[0],
-    -0.8 * resolution.vec[0],
+    0.5 * resolution.vec[0],
+    -0.5 * resolution.vec[0],
     0.5 * resolution.vec[1],
     -0.5 * resolution.vec[1],
     0, 1
@@ -60,16 +39,48 @@ var projMat =  Orthographic(
 var viewMat = new Mat4();
 var shader = null;
 
+// var particles = [];
+
 window.addEventListener(
     "load",
     function setup(){
         const canvas = document.getElementById("webglCanvas");
-        // canvas.setAttribute("width", resolution.vec[0]);
-        // canvas.setAttribute("height", resolution.vec[1]);
-        canvas.setAttribute("width", 1280);
-        canvas.setAttribute("height", 720);
+        const canvasWidth = 1280;
+        const canvasHeight = 720;
+        canvas.setAttribute("width", canvasWidth);
+        canvas.setAttribute("height", canvasHeight);
 
-        const webglContext = canvas.getContext("webgl2");
+        canvas.addEventListener(
+            "mousedown",
+            function(event) {
+                let position = ClampPosition(
+                    new Vec3(
+                        Math.round(event.offsetX * (resolution.vec[0] / canvasWidth)) - 0.5 * resolution.vec[0],
+                        0.5 * resolution.vec[1] - Math.round(event.offsetY * (resolution.vec[1] / canvasHeight)),
+                        0
+                    )
+                );
+
+                switch(event.button){
+                    case 0:
+                        AddToGrid(
+                            new Particle(
+                                webglContext,
+                                shader,
+                                position,
+                                new Vec3(1, 1, 0)
+                            ),
+                            position
+                        );
+                    break;
+                    case 2:
+                        console.log(ParticlesOnTop(position));
+                    break;
+                }
+            }
+        );
+
+        webglContext = canvas.getContext("webgl2");
         if(webglContext === null){
             alert("WebGL2 not available.");
             return;
@@ -80,74 +91,122 @@ window.addEventListener(
         shader.SetProjectionMatrix(projMat);
         shader.SetViewMatrix(viewMat);
 
-        let testParticle = new Renderable(webglContext, shader, vertices, colors);
-
-        webglContext.clearColor(0.25, 0.25, 0.25, 1.0);
-        webglContext.clear(webglContext.COLOR_BUFFER_BIT);
-        testParticle.Draw();
-
-        new ParticleType()
-
-        // Draw();
+        Update();
     }
 );
 
-function Draw(){
+var lastTime = 0, deltaTime = 0;
+function Update(){
     let currentTime = new Date().getTime() * 0.001;
     deltaTime = currentTime - lastTime;
     lastTime = currentTime;
-    
-    webglContext.clearColor(0.25, 0.25, 0.25, 1.0);
+
+    webglContext.clearColor(0.1, 0.1, 0.15, 1.0);
     webglContext.clear(webglContext.COLOR_BUFFER_BIT);
 
-    webglContext.bindBuffer(webglContext.ARRAY_BUFFER, buffers.vertice);
-    webglContext.vertexAttribPointer(
-        programInfo.attributes.vertPos,
-        3,
-        webglContext.FLOAT,
-        false,
-        0,
+    for(let x = 0; x < resolution.vec[0]; x++){
+        for(let y = 0; y < resolution.vec[1]; y++){
+            let particle = GetFromGrid(new Vec2(x, y), false);
+            if(particle){
+                particle.Draw();
+                if(MoveFromTo(particle.position, AddVec3(particle.position, new Vec3(0, -1, 0)))){
+                    console.log("moved down");
+                    continue;
+                }
+                
+                if(ParticlesOnTop(particle.position) > 2){
+                    let dir = Math.round(Math.random() * 2 - 1);
+                    if(MoveFromTo(particle.position, AddVec3(particle.position, new Vec3(dir, 0, 0)))){
+                        console.log("moved sideways");
+                    }
+                    continue;
+                }
+            }
+        }
+    }
+
+    requestAnimationFrame(Update);
+}
+
+function ClampPosition(position){
+    if(position.vec[0] < -0.5 * resolution.vec[0]){
+        position.vec[0] = -0.5 * resolution.vec[0];
+    }
+    else if(position.vec[0] >= 0.5 * resolution.vec[0]){
+        position.vec[0] = 0.5 * resolution.vec[0] - 1;
+    }
+    if(position.vec[1] < -0.5 * resolution.vec[1]){
+        position.vec[1] = -0.5 * resolution.vec[1];
+    }
+    else if(position.vec[1] >= 0.5 * resolution.vec[1]){
+        position.vec[1] = 0.5 * resolution.vec[1] - 1;
+    }
+    return position;
+}
+
+/* PARTICLE SIM FUNCTIONS */
+
+var particlesGrid = [];
+for(let x = 0; x < resolution.vec[0]; x++){
+    particlesGrid.push([]);
+    for(let y = 0; y < resolution.vec[1]; y++){
+        particlesGrid[x].push(false);
+    }
+}
+
+function TranslatePosToGrid(pos){
+    pos = ClampPosition(new Vec3(pos.vec[0], pos.vec[1], 0));
+    return new Vec3(
+        pos.vec[0] + 0.5 * resolution.vec[0],
+        pos.vec[1] + 0.5 * resolution.vec[1],
         0
     );
-    webglContext.enableVertexAttribArray(programInfo.attributes.vertPos);
+}
+function TranslateGridToPos(pos){
+    return ClampPosition(AddVec3(pos, new Vec3(-0.5 * resolution.vec[0], -0.5 * resolution.vec[1], 0)));
+}
 
-    webglContext.bindBuffer(webglContext.ARRAY_BUFFER, buffers.color);
-    webglContext.vertexAttribPointer(
-        programInfo.attributes.vertColor,
-        3,
-        webglContext.FLOAT,
-        false,
-        0,
-        0
-    );
-    webglContext.enableVertexAttribArray(programInfo.attributes.vertColor);
+function AddToGrid(particle, pos, translatePos = true){
+    let posInGrid = translatePos ? TranslatePosToGrid(pos) : pos;
 
-    webglContext.useProgram(programInfo.program);
+    if(particlesGrid[posInGrid.vec[0]][posInGrid.vec[1]])
+        return false;
+    
+    particlesGrid[posInGrid.vec[0]][posInGrid.vec[1]] = particle;
+    return true;
+}
+function GetFromGrid(pos, translatePos = true){
+    let posInGrid = translatePos ? TranslatePosToGrid(pos) : pos;
+    
+    return particlesGrid[posInGrid.vec[0]][posInGrid.vec[1]];
+}
+function MoveFromTo(fromPos, toPos, translatePos = true){
+    let fromInGrid = translatePos ? TranslatePosToGrid(fromPos) : fromPos;
+    let toInGrid = translatePos ? TranslatePosToGrid(toPos) : toPos;
 
-    webglContext.enable(webglContext.DEPTH_TEST);
-    webglContext.uniformMatrix4fv(
-        programInfo.uniforms.projMat,
-        webglContext.FALSE,
-        Orphographic(
-            8, //0.5 * window.innerWidth,
-            -8, //-0.5 * window.innerWidth,
-            4.5, //0.5 * window.innerHeight,
-            -4.5, //-0.5 * window.innerHeight,
-            0,
-            1
-        ).mat
-    );
-    webglContext.uniformMatrix4fv(
-        programInfo.uniforms.transMat,
-        webglContext.FALSE,
-        TransformMat4(
-            new Vec3(0, 0, -1),
-            new Vec3(0, 0, 0),
-            new Vec3(1, 1, 1)
-        ).mat
-    );
+    let tempParticle = particlesGrid[toInGrid.vec[0]][toInGrid.vec[1]];
+    
+    if(tempParticle)
+        return false;
 
-    webglContext.drawArrays(webglContext.TRIANGLE_STRIP, 0, 36);
+    particlesGrid[toInGrid.vec[0]][toInGrid.vec[1]] = particlesGrid[fromInGrid.vec[0]][fromInGrid.vec[1]];
+    particlesGrid[fromInGrid.vec[0]][fromInGrid.vec[1]] = tempParticle;
 
-    requestAnimationFrame(Draw);
+    console.log(toPos.vec, toInGrid.vec, TranslateGridToPos(toInGrid).vec);
+    particlesGrid[toInGrid.vec[0]][toInGrid.vec[1]].position = TranslateGridToPos(toInGrid);
+
+    return true;
+}
+
+function ParticlesOnTop(pos, translatePos = true){
+    let posInGrid = translatePos ? TranslatePosToGrid(pos) : pos;
+
+    let onTop = 0;
+    for(let i = 1; i < (resolution.vec[1] - posInGrid.vec[1]); i++){
+        if(!particlesGrid[posInGrid.vec[0]][posInGrid.vec[1] + i])
+            break;
+        onTop++;
+    }
+
+    return onTop;
 }

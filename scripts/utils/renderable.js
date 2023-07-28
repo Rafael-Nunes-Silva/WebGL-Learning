@@ -1,6 +1,7 @@
 "use strict";
 
-import { Mat4 } from "./matrices.js";
+import { Vec3 } from "./vectors.js";
+import { TransformMat4 } from "./matrices.js";
 
 class Renderable{
     context = null;
@@ -8,10 +9,14 @@ class Renderable{
     VAO = null;
     indicesCount = 0;
 
+    position = new Vec3(0, 0, 0);
+    rotation = new Vec3(0, 0, 0);
+    scale = new Vec3(1, 1, 1);
+    
     constructor(context, shader, vertices, colors){
         this.context = context;
         this.shader = shader;
-
+        
         this.VAO = this.context.createVertexArray();
         this.context.bindVertexArray(this.VAO);
         
@@ -64,7 +69,13 @@ class Renderable{
     Draw(){
         this.context.bindVertexArray(this.VAO);
 
-        this.shader.SetTransformMatrix(new Mat4());
+        this.shader.SetTransformMatrix(
+            TransformMat4(
+                this.position,
+                this.rotation,
+                this.scale
+            )
+        );
 
         this.context.drawElements(this.context.TRIANGLES, this.indicesCount, this.context.UNSIGNED_SHORT, null);
     }
