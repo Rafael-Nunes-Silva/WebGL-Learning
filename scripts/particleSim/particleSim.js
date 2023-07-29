@@ -51,6 +51,12 @@ const SAND = {
     "stability": 0,
     "density": 1
 };
+const VAPOUR = {
+    "color": new Vec3(0, 0, 0.5),
+    "behaviour": new Vec3(0, 1, 0),
+    "stability": -1,
+    "density": -1
+};
 var currentParticleType = WATER;
 var brushSize = 0;
 
@@ -121,6 +127,12 @@ window.addEventListener(
                 currentParticleType = SAND;
             }
         );
+        this.document.getElementById("VAPOUR").addEventListener(
+            "click",
+            function(){
+                currentParticleType = VAPOUR;
+            }
+        );
 
         webglContext = canvas.getContext("webgl2");
         if(webglContext === null){
@@ -146,8 +158,7 @@ function Update(){
     webglContext.clearColor(0.1, 0.1, 0.15, 1.0);
     webglContext.clear(webglContext.COLOR_BUFFER_BIT);
 
-    GetParticlesPos().forEach(function(pos){
-        let particle = GetFromGrid(pos, false);
+    GetParticlesPos().forEach(function(particle){
         particle.Draw();
 
         MoveFromTo(particle.position, AddVec3(particle.position, particle.properties.behaviour))
@@ -195,17 +206,13 @@ for(let x = 0; x < resolution.vec[0]; x++){
     }
 }
 
-function SetParticle(particleType){
-    currentParticleType = particleType;
-}
-
 function GetParticlesPos(){
     let particles = [];
     for(let x = 0; x < resolution.vec[0]; x++){
         for(let y = 0; y < resolution.vec[1]; y++){
             let particle = GetFromGrid(new Vec2(x, y), false);
             if(particle){
-                particles.push(new Vec2(x, y));
+                particles.push(particle);
             }
         }
     }
@@ -242,17 +249,29 @@ function MoveFromTo(fromPos, toPos, translatePos = true){
     let fromInGrid = translatePos ? TranslatePosToGrid(fromPos) : fromPos;
     let toInGrid = translatePos ? TranslatePosToGrid(toPos) : toPos;
 
-    let tempParticle = particlesGrid[toInGrid.vec[0]][toInGrid.vec[1]];
-    
-    if(tempParticle)
+    if(!particlesGrid[fromInGrid.vec[0]][fromInGrid.vec[1]])
         return false;
+    
+    let tempParticle = particlesGrid[toInGrid.vec[0]][toInGrid.vec[1]];
 
-    particlesGrid[toInGrid.vec[0]][toInGrid.vec[1]] = particlesGrid[fromInGrid.vec[0]][fromInGrid.vec[1]];
-    particlesGrid[fromInGrid.vec[0]][fromInGrid.vec[1]] = tempParticle;
+    if(!tempParticle){
+        particlesGrid[toInGrid.vec[0]][toInGrid.vec[1]] = particlesGrid[fromInGrid.vec[0]][fromInGrid.vec[1]];
+        particlesGrid[fromInGrid.vec[0]][fromInGrid.vec[1]] = tempParticle;
 
-    particlesGrid[toInGrid.vec[0]][toInGrid.vec[1]].position = TranslateGridToPos(toInGrid);
+        particlesGrid[toInGrid.vec[0]][toInGrid.vec[1]].position = TranslateGridToPos(toInGrid);
+        return true;
+    }
+    
+    if(tempParticle.properties.density < particlesGrid[fromInGrid.vec[0]][fromInGrid.vec[1]].properties.density){
+        particlesGrid[toInGrid.vec[0]][toInGrid.vec[1]] = particlesGrid[fromInGrid.vec[0]][fromInGrid.vec[1]];
+        particlesGrid[fromInGrid.vec[0]][fromInGrid.vec[1]] = tempParticle;
 
-    return true;
+        particlesGrid[fromInGrid.vec[0]][fromInGrid.vec[1]].position = TranslateGridToPos(fromInGrid);
+        particlesGrid[toInGrid.vec[0]][toInGrid.vec[1]].position = TranslateGridToPos(toInGrid);
+        return true;
+    }
+
+    return false;
 }
 
 function ParticlesAbove(pos, translatePos = true){
