@@ -39,16 +39,19 @@ var projMat =  Orthographic(
 var viewMat = new Mat4();
 var shader = null;
 
-const SAND = {
-    "color": new Vec3(1, 1, 0),
-    "behaviour": new Vec3(0, -1, 0),
-    "stability": 0
-};
 const WATER = {
     "color": new Vec3(0, 0, 1),
     "behaviour": new Vec3(0, -1, 0),
-    "stability": -1
+    "stability": -1,
+    "density": 0
 };
+const SAND = {
+    "color": new Vec3(1, 1, 0),
+    "behaviour": new Vec3(0, -1, 0),
+    "stability": 0,
+    "density": 1
+};
+var currentParticleType = WATER;
 
 window.addEventListener(
     "load",
@@ -70,30 +73,30 @@ window.addEventListener(
                     )
                 );
 
-                switch(event.button){
-                    case 0:
-                        AddToGrid(
-                            new Particle(
-                                webglContext,
-                                shader,
-                                position,
-                                SAND
-                            ),
-                            position
-                        );
-                    break;
-                    case 2:
-                        AddToGrid(
-                            new Particle(
-                                webglContext,
-                                shader,
-                                position,
-                                WATER
-                            ),
-                            position
-                        );
-                    break;
+                if(event.button == 0){
+                    AddToGrid(
+                        new Particle(
+                            webglContext,
+                            shader,
+                            position,
+                            currentParticleType
+                        ),
+                        position
+                    );
                 }
+            }
+        );
+
+        this.document.getElementById("WATER").addEventListener(
+            "click",
+            function(){
+                currentParticleType = WATER;
+            }
+        );
+        this.document.getElementById("SAND").addEventListener(
+            "click",
+            function(){
+                currentParticleType = SAND;
             }
         );
 
@@ -168,6 +171,10 @@ for(let x = 0; x < resolution.vec[0]; x++){
     for(let y = 0; y < resolution.vec[1]; y++){
         particlesGrid[x].push(false);
     }
+}
+
+function SetParticle(particleType){
+    currentParticleType = particleType;
 }
 
 function GetParticlesPos(){
