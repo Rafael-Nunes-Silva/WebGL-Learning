@@ -4,7 +4,7 @@ import { Shader } from '../utils/shader.js';
 import { Particle } from './particle.js';
 
 import { Vec2, Vec3, AddVec3 } from '../utils/vectors.js';
-import { Mat4, Orthographic, TransformMat4 } from '../utils/matrices.js';
+import { Mat4, Orthographic } from '../utils/matrices.js';
 
 const vertSource = `
 attribute vec3 vertPos;
@@ -39,7 +39,16 @@ var projMat =  Orthographic(
 var viewMat = new Mat4();
 var shader = null;
 
-// var particles = [];
+const SAND = {
+    "color": new Vec3(1, 1, 0),
+    "behaviour": new Vec3(0, -1, 0),
+    "stability": 0
+};
+const WATER = {
+    "color": new Vec3(0, 0, 1),
+    "behaviour": new Vec3(0, -1, 0),
+    "stability": -1
+};
 
 window.addEventListener(
     "load",
@@ -68,13 +77,21 @@ window.addEventListener(
                                 webglContext,
                                 shader,
                                 position,
-                                new Vec3(1, 1, 0)
+                                SAND
                             ),
                             position
                         );
                     break;
                     case 2:
-                        console.log(ParticlesOnTop(position));
+                        AddToGrid(
+                            new Particle(
+                                webglContext,
+                                shader,
+                                position,
+                                WATER
+                            ),
+                            position
+                        );
                     break;
                 }
             }
@@ -104,26 +121,25 @@ function Update(){
     webglContext.clearColor(0.1, 0.1, 0.15, 1.0);
     webglContext.clear(webglContext.COLOR_BUFFER_BIT);
 
-    for(let x = 0; x < resolution.vec[0]; x++){
-        for(let y = 0; y < resolution.vec[1]; y++){
-            let particle = GetFromGrid(new Vec2(x, y), false);
-            if(particle){
-                particle.Draw();
-                if(MoveFromTo(particle.position, AddVec3(particle.position, new Vec3(0, -1, 0)))){
-                    console.log("moved down");
-                    continue;
-                }
-                
-                if(ParticlesOnTop(particle.position) > 2){
-                    let dir = Math.round(Math.random() * 2 - 1);
-                    if(MoveFromTo(particle.position, AddVec3(particle.position, new Vec3(dir, 0, 0)))){
-                        console.log("moved sideways");
-                    }
-                    continue;
-                }
+    GetParticlesPos().forEach(function(pos){
+        let particle = GetFromGrid(pos, false);
+        particle.Draw();
+
+        MoveFromTo(particle.position, AddVec3(particle.position, particle.properties.behaviour))
+
+        if(particle.properties.behaviour.vec[1] > 0){
+            if(ParticlesBelow(particle.position) > particle.properties.stability){
+                let dir = Math.round(Math.random() * 2 - 1);
+                MoveFromTo(particle.position, AddVec3(particle.position, new Vec3(dir, 0, 0)))
             }
         }
-    }
+        else if(particle.properties.behaviour.vec[1] < 0){
+            if(ParticlesAbove(particle.position) > particle.properties.stability){
+                let dir = Math.round(Math.random() * 2 - 1);
+                MoveFromTo(particle.position, AddVec3(particle.position, new Vec3(dir, 0, 0)))
+            }
+        }
+    });
 
     requestAnimationFrame(Update);
 }
@@ -152,6 +168,19 @@ for(let x = 0; x < resolution.vec[0]; x++){
     for(let y = 0; y < resolution.vec[1]; y++){
         particlesGrid[x].push(false);
     }
+}
+
+function GetParticlesPos(){
+    let particles = [];
+    for(let x = 0; x < resolution.vec[0]; x++){
+        for(let y = 0; y < resolution.vec[1]; y++){
+            let particle = GetFromGrid(new Vec2(x, y), false);
+            if(particle){
+                particles.push(new Vec2(x, y));
+            }
+        }
+    }
+    return particles;
 }
 
 function TranslatePosToGrid(pos){
@@ -192,17 +221,28 @@ function MoveFromTo(fromPos, toPos, translatePos = true){
     particlesGrid[toInGrid.vec[0]][toInGrid.vec[1]] = particlesGrid[fromInGrid.vec[0]][fromInGrid.vec[1]];
     particlesGrid[fromInGrid.vec[0]][fromInGrid.vec[1]] = tempParticle;
 
-    console.log(toPos.vec, toInGrid.vec, TranslateGridToPos(toInGrid).vec);
     particlesGrid[toInGrid.vec[0]][toInGrid.vec[1]].position = TranslateGridToPos(toInGrid);
 
     return true;
 }
 
-function ParticlesOnTop(pos, translatePos = true){
+function ParticlesAbove(pos, translatePos = true){
     let posInGrid = translatePos ? TranslatePosToGrid(pos) : pos;
 
     let onTop = 0;
     for(let i = 1; i < (resolution.vec[1] - posInGrid.vec[1]); i++){
+        if(!particlesGrid[posInGrid.vec[0]][posInGrid.vec[1] + i])
+            break;
+        onTop++;
+    }
+
+    return onTop;
+}
+function ParticlesBelow(pos, translatePos = true){
+    let posInGrid = translatePos ? TranslatePosToGrid(pos) : pos;
+
+    let onTop = 0;
+    for(let i = -1; i < (resolution.vec[1] - posInGrid.vec[1]); i--){
         if(!particlesGrid[posInGrid.vec[0]][posInGrid.vec[1] + i])
             break;
         onTop++;

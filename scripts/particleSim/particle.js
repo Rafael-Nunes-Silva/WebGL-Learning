@@ -3,25 +3,19 @@
 import { Renderable } from "../utils/renderable.js";
 import { Vec3 } from "../utils/vectors.js"
 
-class ParticleType{
-    constructor(
-        name,
-        properties = {
-            "color": color,
-            "density": density,
-            "meltingPoint": meltingPoint,
-            "boilingPoint": boilingPoint
-        }
-    ){
-        this.name = name;
-        this.properties = properties;
-    }
-}
-export { ParticleType }
-
 class Particle extends Renderable{
     velocity = new Vec3(0, 0, 0);
-    constructor(context, shader, position, color){
+    constructor(
+        context,
+        shader,
+        position,
+        properties = {
+            "color": new Vec3(),
+            "behaviour": new Vec3(),
+            "stability": 0,
+            "density": 0
+        }
+    ){
         super(
             context,
             shader,
@@ -32,13 +26,15 @@ class Particle extends Renderable{
                 0.5, -0.5, 0.0,
             ],
             [
-                ...color.vec,
-                ...color.vec,
-                ...color.vec,
-                ...color.vec
+                ...properties.color.vec,
+                ...properties.color.vec,
+                ...properties.color.vec,
+                ...properties.color.vec
             ]
         );
         this.position = position;
+
+        this.properties = properties;
     }
 
     InvertVelX(){
