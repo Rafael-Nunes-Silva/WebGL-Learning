@@ -52,6 +52,7 @@ const SAND = {
     "density": 1
 };
 var currentParticleType = WATER;
+var brushSize = 0;
 
 window.addEventListener(
     "load",
@@ -65,27 +66,48 @@ window.addEventListener(
         canvas.addEventListener(
             "mousedown",
             function(event) {
-                let position = ClampPosition(
-                    new Vec3(
-                        Math.round(event.offsetX * (resolution.vec[0] / canvasWidth)) - 0.5 * resolution.vec[0],
-                        0.5 * resolution.vec[1] - Math.round(event.offsetY * (resolution.vec[1] / canvasHeight)),
-                        0
-                    )
+                if(event.button != 0)
+                    return;
+                
+                let clickPos = new Vec3(
+                    Math.round(event.offsetX * (resolution.vec[0] / canvasWidth)) - 0.5 * resolution.vec[0],
+                    0.5 * resolution.vec[1] - Math.round(event.offsetY * (resolution.vec[1] / canvasHeight)),
+                    0
                 );
 
-                if(event.button == 0){
-                    AddToGrid(
-                        new Particle(
-                            webglContext,
-                            shader,
-                            position,
-                            currentParticleType
-                        ),
-                        position
-                    );
+                AddToGrid(
+                    new Particle(
+                        webglContext,
+                        shader,
+                        clickPos,
+                        currentParticleType
+                    ),
+                    clickPos
+                );
+
+                for(let x = -brushSize; x < brushSize; x++){
+                    for(let y = -brushSize; y < brushSize; y++){
+                        let brushPos = ClampPosition(AddVec3(clickPos, new Vec3(x, y, 0)));
+                        AddToGrid(
+                            new Particle(
+                                webglContext,
+                                shader,
+                                brushPos,
+                                currentParticleType
+                            ),
+                            brushPos
+                        );
+                    }   
                 }
             }
         );
+
+        this.document.getElementById("Brush").addEventListener(
+            "change",
+            function(e){
+                brushSize = e.target.value;
+            }
+        )
 
         this.document.getElementById("WATER").addEventListener(
             "click",
