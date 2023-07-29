@@ -1,6 +1,6 @@
 "use strict";
 
-import { InitShaderProgram } from './utils/webglfuncs.js';
+import { InitShaderProgram } from "./utils/webglfuncs.js";
 
 const vertSource = `
 attribute vec3 vertPos;

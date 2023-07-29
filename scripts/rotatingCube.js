@@ -1,8 +1,8 @@
 "use strict";
 
-import { InitShaderProgram } from './utils/webglfuncs.js';
-import { Vec3 } from './utils/vectors.js';
-import { Perspective, TransformMat4 } from './utils/matrices.js';
+import { InitShaderProgram } from "./utils/webglfuncs.js";
+import { Vec3 } from "./utils/vectors.js";
+import { Perspective, TransformMat4 } from "./utils/matrices.js";
 
 const vertSource = `
 attribute vec3 vertPos;

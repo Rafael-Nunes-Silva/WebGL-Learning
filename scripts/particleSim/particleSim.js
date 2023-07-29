@@ -1,10 +1,21 @@
 "use strict";
 
-import { Shader } from '../utils/shader.js';
-import { Particle } from './particle.js';
+import { Shader } from "../utils/shader.js";
+import { Particle } from "./particle.js";
+import {
+    VAPOUR,
+    GAS,
+    SMOKE,
+    WATER,
+    LAVA,
+    OIL,
+    ROCK,
+    SAND,
+    SOIL
+} from "./particle.js";
 
-import { Vec2, Vec3, AddVec3 } from '../utils/vectors.js';
-import { Mat4, Orthographic } from '../utils/matrices.js';
+import { Vec2, Vec3, AddVec3 } from "../utils/vectors.js";
+import { Mat4, Orthographic } from "../utils/matrices.js";
 
 const vertSource = `
 attribute vec3 vertPos;
@@ -39,24 +50,6 @@ var projMat =  Orthographic(
 var viewMat = new Mat4();
 var shader = null;
 
-const WATER = {
-    "color": new Vec3(0, 0, 1),
-    "behaviour": new Vec3(0, -1, 0),
-    "stability": -1,
-    "density": 0
-};
-const SAND = {
-    "color": new Vec3(1, 1, 0),
-    "behaviour": new Vec3(0, -1, 0),
-    "stability": 0,
-    "density": 1
-};
-const VAPOUR = {
-    "color": new Vec3(0, 0, 0.5),
-    "behaviour": new Vec3(0, 1, 0),
-    "stability": -1,
-    "density": -1
-};
 var currentParticleType = WATER;
 var brushSize = 0;
 
@@ -115,10 +108,51 @@ window.addEventListener(
             }
         )
 
+        /* Gases */
+        this.document.getElementById("VAPOUR").addEventListener(
+            "click",
+            function(){
+                currentParticleType = VAPOUR;
+            }
+        );
+        this.document.getElementById("GAS").addEventListener(
+            "click",
+            function(){
+                currentParticleType = GAS;
+            }
+        );
+        this.document.getElementById("SMOKE").addEventListener(
+            "click",
+            function(){
+                currentParticleType = SMOKE;
+            }
+        );
+
+        /* Liquid */
         this.document.getElementById("WATER").addEventListener(
             "click",
             function(){
                 currentParticleType = WATER;
+            }
+        );
+        this.document.getElementById("LAVA").addEventListener(
+            "click",
+            function(){
+                currentParticleType = LAVA;
+            }
+        );
+        this.document.getElementById("OIL").addEventListener(
+            "click",
+            function(){
+                currentParticleType = OIL;
+            }
+        );
+
+        /* Solids */
+        this.document.getElementById("ROCK").addEventListener(
+            "click",
+            function(){
+                currentParticleType = ROCK;
             }
         );
         this.document.getElementById("SAND").addEventListener(
@@ -127,10 +161,10 @@ window.addEventListener(
                 currentParticleType = SAND;
             }
         );
-        this.document.getElementById("VAPOUR").addEventListener(
+        this.document.getElementById("SOIL").addEventListener(
             "click",
             function(){
-                currentParticleType = VAPOUR;
+                currentParticleType = SOIL;
             }
         );
 
@@ -277,9 +311,13 @@ function MoveFromTo(fromPos, toPos, translatePos = true){
 function ParticlesAbove(pos, translatePos = true){
     let posInGrid = translatePos ? TranslatePosToGrid(pos) : pos;
 
+    let thisDensity = GetFromGrid(posInGrid, false).properties.density;
+
     let onTop = 0;
     for(let i = 1; i < (resolution.vec[1] - posInGrid.vec[1]); i++){
         if(!particlesGrid[posInGrid.vec[0]][posInGrid.vec[1] + i])
+            break;
+        if(particlesGrid[posInGrid.vec[0]][posInGrid.vec[1] + i].properties.density < thisDensity)
             break;
         onTop++;
     }
@@ -289,12 +327,69 @@ function ParticlesAbove(pos, translatePos = true){
 function ParticlesBelow(pos, translatePos = true){
     let posInGrid = translatePos ? TranslatePosToGrid(pos) : pos;
 
+    let thisDensity = GetFromGrid(posInGrid, false).properties.density;
+
     let onTop = 0;
-    for(let i = -1; i < (resolution.vec[1] - posInGrid.vec[1]); i--){
-        if(!particlesGrid[posInGrid.vec[0]][posInGrid.vec[1] + i])
+    for(let i = 1; i < posInGrid.vec[1]; i++){
+        if(!particlesGrid[posInGrid.vec[0]][posInGrid.vec[1] - i])
+            break;
+        if(particlesGrid[posInGrid.vec[0]][posInGrid.vec[1] - i].properties.density < thisDensity)
             break;
         onTop++;
     }
 
     return onTop;
+}
+
+function SpaceAbove(pos, translatePos = true){
+    let posInGrid = translatePos ? TranslatePosToGrid(pos) : pos;
+
+    let space = 0;
+    for(let i = 1; i < (resolution.vec[1] - posInGrid.vec[1]); i++){
+        if(particlesGrid[posInGrid.vec[0]][posInGrid.vec[1] + i])
+            break;
+        space++;
+    }
+
+    return space;
+}
+function SpaceBelow(pos, translatePos = true){
+    let posInGrid = translatePos ? TranslatePosToGrid(pos) : pos;
+
+    let space = 0;
+    for(let i = 1; i < posInGrid.vec[1]; i++){
+        if(particlesGrid[posInGrid.vec[0]][posInGrid.vec[1] - i])
+            break;
+        space++;
+    }
+
+    return space;
+}
+function SpaceToRight(pos, translatePos = true){
+    let posInGrid = translatePos ? TranslatePosToGrid(pos) : pos;
+
+    let space = 0;
+    for(let i = 1; i < (resolution.vec[0] - posInGrid.vec[0]); i++){
+        if(particlesGrid[posInGrid.vec[0] + i][posInGrid.vec[1]])
+            break;
+        space++;
+    }
+
+    return space;
+}
+function SpaceToLeft(pos, translatePos = true){
+    let posInGrid = translatePos ? TranslatePosToGrid(pos) : pos;
+
+    let space = 0;
+    for(let i = 1; i < posInGrid.vec[0]; i++){
+        if(particlesGrid[posInGrid.vec[0] - i][posInGrid.vec[1]])
+            break;
+        space++;
+    }
+
+    return space;
+}
+
+function CompareParticles(particleA, particleB){
+    return particleA.properties == particleB.properties;
 }
