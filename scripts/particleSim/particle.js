@@ -3,157 +3,194 @@
 import { Renderable } from "../utils/renderable.js";
 import { Vec3 } from "../utils/vectors.js"
 
-const StartTemp = 26;
-
 const PLASMA = {
-    "life": 1,
-    "color": new Vec3(1, 0.05, 0),
-    "behaviour": new Vec3(0, 0, 0),
+    "life": 0,
+    "color": new Vec3(),
+    "behaviour": new Vec3(),
     "stability": 0,
     "density": 0,
-    "tempUp": 0,
-    "tempDown": 0,
+    "startTemp": 0,
+    "tempUp": 1000,
+    "tempDown": -1000,
     "uponTempUp": null,
-    "uponTempDown": null
+    "uponTempDown": null,
+    "product": null
 };
 
 const FIRE = {
-    "life": 3,
-    "color": new Vec3(1, 0.05, 0),
-    "behaviour": new Vec3(0, 1, 0),
-    "stability": -1,
-    "density": -10,
-    "tempUp": 11000,
-    "tempDown": 0,
-    "uponTempUp": PLASMA,
-    "uponTempDown": null
+    "life": 0,
+    "color": new Vec3(),
+    "behaviour": new Vec3(),
+    "stability": 0,
+    "density": 0,
+    "startTemp": 0,
+    "tempUp": 1000,
+    "tempDown": -1000,
+    "uponTempUp": null,
+    "uponTempDown": null,
+    "product": null
 };
 
 /* Gases */
 const VAPOUR = {
-    "life": 1,
-    "color": new Vec3(1, 0.25, 0),
-    "behaviour": new Vec3(0, 0, 0),
+    "life": 0,
+    "color": new Vec3(),
+    "behaviour": new Vec3(),
     "stability": 0,
     "density": 0,
-    "tempUp": 0,
-    "tempDown": 0,
+    "startTemp": 0,
+    "tempUp": 1000,
+    "tempDown": -1000,
     "uponTempUp": null,
-    "uponTempDown": null
+    "uponTempDown": null,
+    "product": null
 };
 const GAS = {
-    "life": 1,
-    "color": new Vec3(1, 0.25, 0),
-    "behaviour": new Vec3(0, 0, 0),
+    "life": 0,
+    "color": new Vec3(),
+    "behaviour": new Vec3(),
     "stability": 0,
     "density": 0,
-    "tempUp": 0,
-    "tempDown": 0,
+    "startTemp": 0,
+    "tempUp": 1000,
+    "tempDown": -1000,
     "uponTempUp": null,
-    "uponTempDown": null
+    "uponTempDown": null,
+    "product": null
 };
 const SMOKE = {
-    "life": 1,
-    "color": new Vec3(1, 0.25, 0),
-    "behaviour": new Vec3(0, 0, 0),
+    "life": 0,
+    "color": new Vec3(),
+    "behaviour": new Vec3(),
     "stability": 0,
     "density": 0,
-    "tempUp": 0,
-    "tempDown": 0,
+    "startTemp": 0,
+    "tempUp": 1000,
+    "tempDown": -1000,
     "uponTempUp": null,
-    "uponTempDown": null
+    "uponTempDown": null,
+    "product": null
 };
 
 /* Liquids */
 const WATER = {
-    "life": 1,
-    "color": new Vec3(1, 0.25, 0),
-    "behaviour": new Vec3(0, 0, 0),
+    "life": 0,
+    "color": new Vec3(),
+    "behaviour": new Vec3(),
     "stability": 0,
     "density": 0,
-    "tempUp": 0,
-    "tempDown": 0,
+    "startTemp": 0,
+    "tempUp": 1000,
+    "tempDown": -1000,
     "uponTempUp": null,
-    "uponTempDown": null
+    "uponTempDown": null,
+    "product": null
 };
 const LAVA = {
-    "life": 1,
-    "color": new Vec3(1, 0.25, 0),
-    "behaviour": new Vec3(0, 0, 0),
+    "life": 0,
+    "color": new Vec3(),
+    "behaviour": new Vec3(),
     "stability": 0,
     "density": 0,
-    "tempUp": 0,
-    "tempDown": 0,
+    "startTemp": 0,
+    "tempUp": 1000,
+    "tempDown": -1000,
     "uponTempUp": null,
-    "uponTempDown": null
+    "uponTempDown": null,
+    "product": null
 };
 const OIL = {
-    "life": 1,
-    "color": new Vec3(1, 0.25, 0),
-    "behaviour": new Vec3(0, 0, 0),
+    "life": 0,
+    "color": new Vec3(),
+    "behaviour": new Vec3(),
     "stability": 0,
     "density": 0,
-    "tempUp": 0,
-    "tempDown": 0,
+    "startTemp": 0,
+    "tempUp": 1000,
+    "tempDown": -1000,
     "uponTempUp": null,
-    "uponTempDown": null
+    "uponTempDown": null,
+    "product": null
 };
 
 /* Solids */
 const ROCK = {
-    "life": 1,
-    "color": new Vec3(1, 0.25, 0),
-    "behaviour": new Vec3(0, 0, 0),
+    "life": 0,
+    "color": new Vec3(),
+    "behaviour": new Vec3(),
     "stability": 0,
     "density": 0,
-    "tempUp": 0,
-    "tempDown": 0,
+    "startTemp": 0,
+    "tempUp": 1000,
+    "tempDown": -1000,
     "uponTempUp": null,
-    "uponTempDown": null
+    "uponTempDown": null,
+    "product": null
+};
+const WOOD = {
+    "life": 0,
+    "color": new Vec3(),
+    "behaviour": new Vec3(),
+    "stability": 0,
+    "density": 0,
+    "startTemp": 0,
+    "tempUp": 1000,
+    "tempDown": -1000,
+    "uponTempUp": null,
+    "uponTempDown": null,
+    "product": null
 };
 const STONE = {
-    "life": 1,
-    "color": new Vec3(1, 0.25, 0),
-    "behaviour": new Vec3(0, 0, 0),
+    "life": 0,
+    "color": new Vec3(),
+    "behaviour": new Vec3(),
     "stability": 0,
     "density": 0,
-    "tempUp": 0,
-    "tempDown": 0,
+    "startTemp": 0,
+    "tempUp": 1000,
+    "tempDown": -1000,
     "uponTempUp": null,
-    "uponTempDown": null
+    "uponTempDown": null,
+    "product": null
 };
 const SAND = {
-    "life": 1,
-    "color": new Vec3(1, 0.25, 0),
-    "behaviour": new Vec3(0, 0, 0),
+    "life": 0,
+    "color": new Vec3(),
+    "behaviour": new Vec3(),
     "stability": 0,
     "density": 0,
-    "tempUp": 0,
-    "tempDown": 0,
+    "startTemp": 0,
+    "tempUp": 1000,
+    "tempDown": -1000,
     "uponTempUp": null,
-    "uponTempDown": null
+    "uponTempDown": null,
+    "product": null
 };
 const SOIL = {
-    "life": 1,
-    "color": new Vec3(1, 0.25, 0),
-    "behaviour": new Vec3(0, 0, 0),
+    "life": 0,
+    "color": new Vec3(),
+    "behaviour": new Vec3(),
     "stability": 0,
     "density": 0,
-    "tempUp": 0,
-    "tempDown": 0,
+    "startTemp": 0,
+    "tempUp": 1000,
+    "tempDown": -1000,
     "uponTempUp": null,
-    "uponTempDown": null
+    "uponTempDown": null,
+    "product": null
 };
 const ICE = {
-    "life": 1,
-    "color": new Vec3(1, 0.25, 0),
-    "behaviour": new Vec3(0, 0, 0),
+    "life": 0,
+    "color": new Vec3(),
+    "behaviour": new Vec3(),
     "stability": 0,
     "density": 0,
-    "tempUp": 0,
-    "tempDown": 0,
+    "startTemp": 0,
+    "tempUp": 1000,
+    "tempDown": -1000,
     "uponTempUp": null,
-    "uponTempDown": null
+    "uponTempDown": null,
+    "product": null
 };
 
 export {
@@ -169,12 +206,35 @@ export {
     OIL,
 
     ROCK,
+    WOOD,
     STONE,
     SAND,
     SOIL,
     ICE
 }
 
+/* PLASMA */
+PLASMA.life = 5;
+PLASMA.color = new Vec3(1, 0, 0);
+PLASMA.behaviour = new Vec3(0, 0, -1);
+PLASMA.stability = -1;
+PLASMA.density = -100;
+PLASMA.startTemp = 100000;
+PLASMA.tempUp = 1000000;
+PLASMA.tempDown = 11000;
+PLASMA.uponTempDown = FIRE;
+
+/* FIRE */
+FIRE.life = 10;
+FIRE.color = new Vec3(1, 0.1, 0);
+FIRE.behaviour = new Vec3(0, 1, 0);
+FIRE.stability = -1;
+FIRE.density = -10;
+FIRE.startTemp = 1000;
+FIRE.tempUp = 11000;
+FIRE.tempDown = 200;
+FIRE.uponTempUp = PLASMA;
+FIRE.uponTempDown = SMOKE;
 
 /* VAPOUR */
 VAPOUR.life = -1;
@@ -182,9 +242,9 @@ VAPOUR.color = new Vec3(0, 0, 0.4);
 VAPOUR.behaviour = new Vec3(0, 1, 0);
 VAPOUR.stability = -1;
 VAPOUR.density = 1;
+VAPOUR.startTemp = 100;
 VAPOUR.tempUp = 1000;
 VAPOUR.tempDown = 100;
-VAPOUR.uponTempUp = null;
 VAPOUR.uponTempDown = WATER;
 
 /* GAS */
@@ -193,10 +253,10 @@ GAS.color = new Vec3(0.7, 0.7, 0.15);
 GAS.behaviour = new Vec3(0, 1, 0);
 GAS.stability = -1;
 GAS.density = -3;
-GAS.tempUp = 500;
-GAS.tempDown = 200;
+GAS.startTemp = 30;
+GAS.tempUp = 300;
 GAS.uponTempUp = PLASMA;
-GAS.uponTempDown = OIL;
+GAS.product = SMOKE;
 
 /* SMOKE */
 SMOKE.life = -1;
@@ -204,10 +264,7 @@ SMOKE.color = new Vec3(0.15, 0.15, 0.15);
 SMOKE.behaviour = new Vec3(0, 1, 0);
 SMOKE.stability = -1;
 SMOKE.density = -2;
-SMOKE.tempUp = 0;
-SMOKE.tempDown = 0;
-SMOKE.uponTempUp = null;
-SMOKE.uponTempDown = null;
+SMOKE.startTemp = 30;
 
 /* WATER */
 WATER.life = -1;
@@ -215,6 +272,7 @@ WATER.color = new Vec3(0, 0, 1);
 WATER.behaviour = new Vec3(0, -1, 0);
 WATER.stability = -1;
 WATER.density = 0;
+WATER.startTemp = 30;
 WATER.tempUp = 100;
 WATER.tempDown = 0;
 WATER.uponTempUp = VAPOUR;
@@ -226,9 +284,9 @@ LAVA.color = new Vec3(1, 0.5, 0);
 LAVA.behaviour = new Vec3(0, -1, 0);
 LAVA.stability = -1;
 LAVA.density = 5;
+LAVA.startTemp = 800;
 LAVA.tempUp = 1200;
 LAVA.tempDown = 600;
-LAVA.uponTempUp = null;
 LAVA.uponTempDown = STONE;
 
 /* OIL */
@@ -237,10 +295,11 @@ OIL.color = new Vec3(0.1, 0.1, 0.1);
 OIL.behaviour = new Vec3(0, -1, 0);
 OIL.stability = -1;
 OIL.density = -1;
+OIL.startTemp = 30;
 OIL.tempUp = 200;
 OIL.tempDown = -50;
 OIL.uponTempUp = GAS;
-OIL.uponTempDown = null;
+OIL.product = FIRE;
 
 /* ROCK */
 ROCK.life = -1;
@@ -248,10 +307,19 @@ ROCK.color = new Vec3(0.25, 0.25, 0.25);
 ROCK.behaviour = new Vec3(0, 0, 0);
 ROCK.stability = 0;
 ROCK.density = 5;
-ROCK.tempUp = 0;
-ROCK.tempDown = 0;
-ROCK.uponTempUp = null;
-ROCK.uponTempDown = null;
+ROCK.startTemp = 30;
+ROCK.product = FIRE;
+
+/* WOOD */
+WOOD.life = -1;
+WOOD.color = new Vec3(0.5, 0.25, 0);
+WOOD.behaviour = new Vec3(0, 0, 0);
+WOOD.stability = 0;
+WOOD.density = 5;
+WOOD.startTemp = 30;
+WOOD.tempUp = 200;
+WOOD.uponTempUp = SMOKE;
+WOOD.product = FIRE;
 
 /* STONE */
 STONE.life = -1;
@@ -259,10 +327,9 @@ STONE.color = new Vec3(0.3, 0.3, 0.3);
 STONE.behaviour = new Vec3(0, -1, 0);
 STONE.stability = 0;
 STONE.density = 5;
+STONE.startTemp = 30;
 STONE.tempUp = 600;
-STONE.tempDown = 0;
 STONE.uponTempUp = LAVA;
-STONE.uponTempDown = null;
 
 /* SAND */
 SAND.life = -1;
@@ -270,10 +337,8 @@ SAND.color = new Vec3(1, 1, 0);
 SAND.behaviour = new Vec3(0, -1, 0);
 SAND.stability = 0;
 SAND.density = 5;
+SAND.startTemp = 30;
 SAND.tempUp = 1700;
-SAND.tempDown = 0;
-SAND.uponTempUp = null;
-SAND.uponTempDown = null;
 
 /* SOIL */
 SOIL.life = -1;
@@ -281,10 +346,9 @@ SOIL.color = new Vec3(0.45, 0.2, 0);
 SOIL.behaviour = new Vec3(0, -1, 0);
 SOIL.stability = 0;
 SOIL.density = 5;
+SOIL.startTemp = 30;
 SOIL.tempUp = 60;
-SOIL.tempDown = 0;
 SOIL.uponTempUp = SAND;
-SOIL.uponTempDown = null;
 
 /* ICE */
 ICE.life = -1;
@@ -292,10 +356,9 @@ ICE.color = new Vec3(0.8, 0.8, 1);
 ICE.behaviour = new Vec3(0, -1, 0);
 ICE.stability = 0;
 ICE.density = 1;
+ICE.startTemp = -50;
 ICE.tempUp = 0;
-ICE.tempDown = 0;
 ICE.uponTempUp = WATER;
-ICE.uponTempDown = null;
 
 class Particle extends Renderable{
     constructor(
@@ -314,7 +377,6 @@ class Particle extends Renderable{
             "uponTempDown": null
         }
     ){
-        console.log(properties);
         super(
             context,
             shader,
@@ -337,9 +399,6 @@ class Particle extends Renderable{
         let tempChange = Math.round(Math.random() * 4 - 2);
         this.tempUp += tempChange;
         this.tempDown += tempChange;
-        console.log(this.tempUp);
-        console.log(this.tempDown);
-        this.temperature = StartTemp;
     }
 
     SetProperties(properties){
@@ -348,17 +407,19 @@ class Particle extends Renderable{
         this.behaviour = properties.behaviour;
         this.stability = properties.stability;
         this.density = properties.density;
+        this.temperature = properties.startTemp;
         this.tempUp = properties.tempUp;
         this.tempDown = properties.tempDown;
         this.uponTempUp = properties.uponTempUp;
         this.uponTempDown = properties.uponTempDown;
+        this.product = properties.product;
     }
 
-    Update(targetTemperature){
-        if(this.temperature > targetTemperature)
-            this.temperature--;
-        else if(this.temperature < targetTemperature)
-            this.temperature++;
+    Update(){
+        if(this.life > 0)
+            this.life--;
+        else if(this.life == 0)
+            return false;
 
         if(this.uponTempUp && this.temperature > this.tempUp){
             this.SetProperties(this.uponTempUp);
@@ -394,6 +455,8 @@ class Particle extends Renderable{
                 ]
             );
         }
+
+        return true;
     }
 }
 export { Particle }

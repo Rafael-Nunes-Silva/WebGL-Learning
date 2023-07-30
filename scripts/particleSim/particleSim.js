@@ -6,7 +6,7 @@ import {
 
     PLASMA,
     FIRE,
-    
+
     VAPOUR,
     GAS,
     SMOKE,
@@ -16,6 +16,7 @@ import {
     OIL,
 
     ROCK,
+    WOOD,
     STONE,
     SAND,
     SOIL,
@@ -71,6 +72,13 @@ window.addEventListener(
         canvas.setAttribute("width", canvasWidth);
         canvas.setAttribute("height", canvasHeight);
 
+        webglContext = canvas.getContext("webgl2");
+        if(webglContext === null){
+            alert("WebGL2 not available.");
+            return;
+        }
+        
+        SetupControls();
         canvas.addEventListener(
             "mousedown",
             function(event) {
@@ -110,111 +118,6 @@ window.addEventListener(
             }
         );
 
-        /* Controls */
-        this.document.getElementById("Brush").addEventListener(
-            "change",
-            function(e){
-                brushSize = e.target.value;
-            }
-        )
-        this.document.getElementById("Temperature").addEventListener(
-            "change",
-            function(e){
-                temperature = e.target.value;
-            }
-        )
-
-        this.document.getElementById("PLASMA").addEventListener(
-            "click",
-            function(){
-                currentParticleType = PLASMA;
-            }
-        );
-        this.document.getElementById("FIRE").addEventListener(
-            "click",
-            function(){
-                currentParticleType = FIRE;
-            }
-        );
-
-        /* Gases */
-        this.document.getElementById("VAPOUR").addEventListener(
-            "click",
-            function(){
-                currentParticleType = VAPOUR;
-            }
-        );
-        this.document.getElementById("GAS").addEventListener(
-            "click",
-            function(){
-                currentParticleType = GAS;
-            }
-        );
-        this.document.getElementById("SMOKE").addEventListener(
-            "click",
-            function(){
-                currentParticleType = SMOKE;
-            }
-        );
-
-        /* Liquid */
-        this.document.getElementById("WATER").addEventListener(
-            "click",
-            function(){
-                currentParticleType = WATER;
-            }
-        );
-        this.document.getElementById("LAVA").addEventListener(
-            "click",
-            function(){
-                currentParticleType = LAVA;
-            }
-        );
-        this.document.getElementById("OIL").addEventListener(
-            "click",
-            function(){
-                currentParticleType = OIL;
-            }
-        );
-
-        /* Solids */
-        this.document.getElementById("ROCK").addEventListener(
-            "click",
-            function(){
-                currentParticleType = ROCK;
-            }
-        );
-        this.document.getElementById("STONE").addEventListener(
-            "click",
-            function(){
-                currentParticleType = STONE;
-            }
-        );
-        this.document.getElementById("SAND").addEventListener(
-            "click",
-            function(){
-                currentParticleType = SAND;
-            }
-        );
-        this.document.getElementById("SOIL").addEventListener(
-            "click",
-            function(){
-                currentParticleType = SOIL;
-            }
-        );
-        this.document.getElementById("ICE").addEventListener(
-            "click",
-            function(){
-                currentParticleType = ICE;
-            }
-        );
-
-        webglContext = canvas.getContext("webgl2");
-        if(webglContext === null){
-            alert("WebGL2 not available.");
-            return;
-        }
-
         shader = new Shader(webglContext, vertSource, fragSource);
         shader.Use();
         shader.SetProjectionMatrix(projMat);
@@ -223,6 +126,113 @@ window.addEventListener(
         Update();
     }
 );
+
+function SetupControls(){
+    /* Controls */
+    document.getElementById("Brush").addEventListener(
+        "change",
+        function(e){
+            brushSize = e.target.value;
+        }
+    )
+    // document.getElementById("Temperature").addEventListener(
+    //     "change",
+    //     function(e){
+    //         temperature = e.target.value;
+    //     }
+    // )
+
+    document.getElementById("PLASMA").addEventListener(
+        "click",
+        function(){
+            currentParticleType = PLASMA;
+        }
+    );
+    document.getElementById("FIRE").addEventListener(
+        "click",
+        function(){
+            currentParticleType = FIRE;
+        }
+    );
+
+    /* Gases */
+    document.getElementById("VAPOUR").addEventListener(
+        "click",
+        function(){
+            currentParticleType = VAPOUR;
+        }
+    );
+    document.getElementById("GAS").addEventListener(
+        "click",
+        function(){
+            currentParticleType = GAS;
+        }
+    );
+    document.getElementById("SMOKE").addEventListener(
+        "click",
+        function(){
+            currentParticleType = SMOKE;
+        }
+    );
+
+    /* Liquid */
+    document.getElementById("WATER").addEventListener(
+        "click",
+        function(){
+            currentParticleType = WATER;
+        }
+    );
+    document.getElementById("LAVA").addEventListener(
+        "click",
+        function(){
+            currentParticleType = LAVA;
+        }
+    );
+    document.getElementById("OIL").addEventListener(
+        "click",
+        function(){
+            currentParticleType = OIL;
+        }
+    );
+
+    /* Solids */
+    document.getElementById("ROCK").addEventListener(
+        "click",
+        function(){
+            currentParticleType = ROCK;
+        }
+    );
+    document.getElementById("WOOD").addEventListener(
+        "click",
+        function(){
+            currentParticleType = WOOD;
+        }
+    );
+    document.getElementById("STONE").addEventListener(
+        "click",
+        function(){
+            currentParticleType = STONE;
+        }
+    );
+    document.getElementById("SAND").addEventListener(
+        "click",
+        function(){
+            currentParticleType = SAND;
+        }
+    );
+    document.getElementById("SOIL").addEventListener(
+        "click",
+        function(){
+            currentParticleType = SOIL;
+        }
+    );
+    document.getElementById("ICE").addEventListener(
+        "click",
+        function(){
+            currentParticleType = ICE;
+        }
+    );
+}
 
 var lastTime = 0, deltaTime = 0;
 function Update(){
@@ -235,11 +245,11 @@ function Update(){
 
     GetParticlesPos().forEach(function(particle){
         particle.Draw();
-        particle.Update(temperature);
-
+        CalculateTemperature(particle);
+        if(!particle.Update())
+            RemoveFromGrid(particle.position);
+        
         MoveFromTo(particle.position, AddVec3(particle.position, particle.behaviour));
-
-        // FIX THE TEMPERATURE STUFF
 
         if(particle.behaviour.vec[1] > 0){
             if(ParticlesBelow(particle.position) > particle.stability){
@@ -322,6 +332,11 @@ function GetFromGrid(pos, translatePos = true){
     let posInGrid = translatePos ? TranslatePosToGrid(pos) : pos;
     
     return particlesGrid[posInGrid.vec[0]][posInGrid.vec[1]];
+}
+function RemoveFromGrid(pos, translatePos = true){
+    let posInGrid = translatePos ? TranslatePosToGrid(pos) : pos;
+
+    particlesGrid[posInGrid.vec[0]][posInGrid.vec[1]] = false;
 }
 function MoveFromTo(fromPos, toPos, translatePos = true){
     let fromInGrid = translatePos ? TranslatePosToGrid(fromPos) : fromPos;
@@ -436,4 +451,59 @@ function SpaceToLeft(pos, translatePos = true){
 
 function CompareParticles(particleA, particleB){
     return particleA == particleB;
+}
+
+function HasEmptyAround(pos, translatePos = true){
+    let posInGrid = translatePos ? TranslatePosToGrid(pos) : pos;
+
+    let emptyPos = AddVec3(posInGrid, new Vec3(0, 1, 0));
+    if(!GetFromGrid(emptyPos, false))
+        return TranslateGridToPos(emptyPos);
+    
+    emptyPos = AddVec3(posInGrid, new Vec3(0, -1, 0));
+    if(!GetFromGrid(emptyPos, false))
+        return TranslateGridToPos(emptyPos);
+    
+    emptyPos = AddVec3(posInGrid, new Vec3(1, 0, 0));
+    if(!GetFromGrid(emptyPos, false))
+        return TranslateGridToPos(emptyPos);
+    
+    emptyPos = AddVec3(posInGrid, new Vec3(-1, 0, 0));
+    if(!GetFromGrid(emptyPos, false))
+        return TranslateGridToPos(emptyPos);
+    
+    return false;
+}
+function EmptyUnder(pos, translatePos = true){
+    let posInGrid = translatePos ? TranslatePosToGrid(pos) : pos;
+
+    return !GetFromGrid(AddVec3(posInGrid, new Vec3(0, -1, 0)), false);
+}
+
+function CalculateTemperature(particle){
+    let above = GetFromGrid(AddVec3(particle.position, new Vec3(0, 1, 0)));
+    let below = GetFromGrid(AddVec3(particle.position, new Vec3(0, -1, 0)));
+    let right = GetFromGrid(AddVec3(particle.position, new Vec3(1, 0, 0)));
+    let left = GetFromGrid(AddVec3(particle.position, new Vec3(-1, 0, 0)));
+
+    if(below){
+        let temp = (below.temperature + particle.temperature) * 0.5;
+        below.temperature = temp;
+        particle.temperature = temp;
+    }
+    if(right){
+        let temp = (right.temperature + particle.temperature) * 0.5;
+        right.temperature = temp;
+        particle.temperature = temp;
+    }
+    if(left){
+        let temp = (left.temperature + particle.temperature) * 0.5;
+        left.temperature = temp;
+        particle.temperature = temp;
+    }
+    if(above){
+        let temp = (above.temperature + particle.temperature) * 0.5;
+        above.temperature = temp;
+        particle.temperature = temp;
+    }
 }
