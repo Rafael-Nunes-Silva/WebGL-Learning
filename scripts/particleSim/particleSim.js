@@ -1,17 +1,25 @@
 "use strict";
 
 import { Shader } from "../utils/shader.js";
-import { Particle } from "./particle.js";
 import {
+    Particle,
+
+    PLASMA,
+    FIRE,
+    
     VAPOUR,
     GAS,
     SMOKE,
+
     WATER,
     LAVA,
     OIL,
+
     ROCK,
+    STONE,
     SAND,
-    SOIL
+    SOIL,
+    ICE
 } from "./particle.js";
 
 import { Vec2, Vec3, AddVec3 } from "../utils/vectors.js";
@@ -52,6 +60,7 @@ var shader = null;
 
 var currentParticleType = WATER;
 var brushSize = 0;
+var temperature = 30;
 
 window.addEventListener(
     "load",
@@ -69,8 +78,8 @@ window.addEventListener(
                     return;
                 
                 let clickPos = new Vec3(
-                    Math.round(event.offsetX * (resolution.vec[0] / canvasWidth)) - 0.5 * resolution.vec[0],
-                    0.5 * resolution.vec[1] - Math.round(event.offsetY * (resolution.vec[1] / canvasHeight)),
+                    Math.round(event.offsetX * (resolution.vec[0] / canvasWidth) - 0.5) - 0.5 * resolution.vec[0],
+                    0.5 * resolution.vec[1] - Math.round(event.offsetY * (resolution.vec[1] / canvasHeight) + 0.5),
                     0
                 );
 
@@ -101,12 +110,32 @@ window.addEventListener(
             }
         );
 
+        /* Controls */
         this.document.getElementById("Brush").addEventListener(
             "change",
             function(e){
                 brushSize = e.target.value;
             }
         )
+        this.document.getElementById("Temperature").addEventListener(
+            "change",
+            function(e){
+                temperature = e.target.value;
+            }
+        )
+
+        this.document.getElementById("PLASMA").addEventListener(
+            "click",
+            function(){
+                currentParticleType = PLASMA;
+            }
+        );
+        this.document.getElementById("FIRE").addEventListener(
+            "click",
+            function(){
+                currentParticleType = FIRE;
+            }
+        );
 
         /* Gases */
         this.document.getElementById("VAPOUR").addEventListener(
@@ -155,6 +184,12 @@ window.addEventListener(
                 currentParticleType = ROCK;
             }
         );
+        this.document.getElementById("STONE").addEventListener(
+            "click",
+            function(){
+                currentParticleType = STONE;
+            }
+        );
         this.document.getElementById("SAND").addEventListener(
             "click",
             function(){
@@ -165,6 +200,12 @@ window.addEventListener(
             "click",
             function(){
                 currentParticleType = SOIL;
+            }
+        );
+        this.document.getElementById("ICE").addEventListener(
+            "click",
+            function(){
+                currentParticleType = ICE;
             }
         );
 
@@ -189,22 +230,25 @@ function Update(){
     deltaTime = currentTime - lastTime;
     lastTime = currentTime;
 
-    webglContext.clearColor(0.1, 0.1, 0.15, 1.0);
+    webglContext.clearColor(0.0, 0.0, 0.0, 1.0);
     webglContext.clear(webglContext.COLOR_BUFFER_BIT);
 
     GetParticlesPos().forEach(function(particle){
         particle.Draw();
+        particle.Update(temperature);
 
-        MoveFromTo(particle.position, AddVec3(particle.position, particle.properties.behaviour))
+        MoveFromTo(particle.position, AddVec3(particle.position, particle.behaviour));
 
-        if(particle.properties.behaviour.vec[1] > 0){
-            if(ParticlesBelow(particle.position) > particle.properties.stability){
+        // FIX THE TEMPERATURE STUFF
+
+        if(particle.behaviour.vec[1] > 0){
+            if(ParticlesBelow(particle.position) > particle.stability){
                 let dir = Math.round(Math.random() * 2 - 1);
                 MoveFromTo(particle.position, AddVec3(particle.position, new Vec3(dir, 0, 0)))
             }
         }
-        else if(particle.properties.behaviour.vec[1] < 0){
-            if(ParticlesAbove(particle.position) > particle.properties.stability){
+        else if(particle.behaviour.vec[1] < 0){
+            if(ParticlesAbove(particle.position) > particle.stability){
                 let dir = Math.round(Math.random() * 2 - 1);
                 MoveFromTo(particle.position, AddVec3(particle.position, new Vec3(dir, 0, 0)))
             }
@@ -296,7 +340,7 @@ function MoveFromTo(fromPos, toPos, translatePos = true){
         return true;
     }
     
-    if(tempParticle.properties.density < particlesGrid[fromInGrid.vec[0]][fromInGrid.vec[1]].properties.density){
+    if(tempParticle.density < particlesGrid[fromInGrid.vec[0]][fromInGrid.vec[1]].density){
         particlesGrid[toInGrid.vec[0]][toInGrid.vec[1]] = particlesGrid[fromInGrid.vec[0]][fromInGrid.vec[1]];
         particlesGrid[fromInGrid.vec[0]][fromInGrid.vec[1]] = tempParticle;
 
@@ -311,13 +355,13 @@ function MoveFromTo(fromPos, toPos, translatePos = true){
 function ParticlesAbove(pos, translatePos = true){
     let posInGrid = translatePos ? TranslatePosToGrid(pos) : pos;
 
-    let thisDensity = GetFromGrid(posInGrid, false).properties.density;
+    let thisDensity = GetFromGrid(posInGrid, false).density;
 
     let onTop = 0;
     for(let i = 1; i < (resolution.vec[1] - posInGrid.vec[1]); i++){
         if(!particlesGrid[posInGrid.vec[0]][posInGrid.vec[1] + i])
             break;
-        if(particlesGrid[posInGrid.vec[0]][posInGrid.vec[1] + i].properties.density < thisDensity)
+        if(particlesGrid[posInGrid.vec[0]][posInGrid.vec[1] + i].density < thisDensity)
             break;
         onTop++;
     }
@@ -327,13 +371,13 @@ function ParticlesAbove(pos, translatePos = true){
 function ParticlesBelow(pos, translatePos = true){
     let posInGrid = translatePos ? TranslatePosToGrid(pos) : pos;
 
-    let thisDensity = GetFromGrid(posInGrid, false).properties.density;
+    let thisDensity = GetFromGrid(posInGrid, false).density;
 
     let onTop = 0;
     for(let i = 1; i < posInGrid.vec[1]; i++){
         if(!particlesGrid[posInGrid.vec[0]][posInGrid.vec[1] - i])
             break;
-        if(particlesGrid[posInGrid.vec[0]][posInGrid.vec[1] - i].properties.density < thisDensity)
+        if(particlesGrid[posInGrid.vec[0]][posInGrid.vec[1] - i].density < thisDensity)
             break;
         onTop++;
     }
@@ -391,5 +435,5 @@ function SpaceToLeft(pos, translatePos = true){
 }
 
 function CompareParticles(particleA, particleB){
-    return particleA.properties == particleB.properties;
+    return particleA == particleB;
 }

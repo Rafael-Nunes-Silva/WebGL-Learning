@@ -17,7 +17,8 @@ class Shader{
             uniforms: {
                 projMat: this.context.getUniformLocation(shaderProgram, "projMat"),
                 viewMat: this.context.getUniformLocation(shaderProgram, "viewMat"),
-                transMat: this.context.getUniformLocation(shaderProgram, "transMat")
+                transMat: this.context.getUniformLocation(shaderProgram, "transMat"),
+                // color: this.context.getUniformLocation(shaderProgram, "color")
             }
         };
     }
@@ -77,6 +78,14 @@ class Shader{
             this.programInfo.uniforms.transMat,
             this.context.FALSE,
             transMat.mat
+        );
+    }
+
+    SetColor(color){
+        this.context.uniformVec3fv(
+            this.programInfo.uniforms.color,
+            this.context.FALSE,
+            color.vec
         );
     }
 }

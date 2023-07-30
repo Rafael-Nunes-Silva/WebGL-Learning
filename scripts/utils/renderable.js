@@ -16,8 +16,13 @@ class Renderable{
     constructor(context, shader, vertices, colors){
         this.context = context;
         this.shader = shader;
+
         
         this.VAO = this.context.createVertexArray();
+        this.UpdateBuffers(vertices, colors);
+    }
+
+    UpdateBuffers(vertices, colors){
         this.context.bindVertexArray(this.VAO);
         
         const verticeBuffer = this.context.createBuffer();
