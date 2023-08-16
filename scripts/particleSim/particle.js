@@ -14,6 +14,7 @@ const PLASMA = {
     "tempDown": -1000,
     "uponTempUp": null,
     "uponTempDown": null,
+    "heatUponUP": 0,
     "product": null
 };
 
@@ -28,6 +29,7 @@ const FIRE = {
     "tempDown": -1000,
     "uponTempUp": null,
     "uponTempDown": null,
+    "heatUponUP": 0,
     "product": null
 };
 
@@ -43,6 +45,7 @@ const VAPOUR = {
     "tempDown": -1000,
     "uponTempUp": null,
     "uponTempDown": null,
+    "heatUponUP": 0,
     "product": null
 };
 const GAS = {
@@ -56,6 +59,7 @@ const GAS = {
     "tempDown": -1000,
     "uponTempUp": null,
     "uponTempDown": null,
+    "heatUponUP": 0,
     "product": null
 };
 const SMOKE = {
@@ -69,6 +73,7 @@ const SMOKE = {
     "tempDown": -1000,
     "uponTempUp": null,
     "uponTempDown": null,
+    "heatUponUP": 0,
     "product": null
 };
 
@@ -84,6 +89,7 @@ const WATER = {
     "tempDown": -1000,
     "uponTempUp": null,
     "uponTempDown": null,
+    "heatUponUP": 0,
     "product": null
 };
 const LAVA = {
@@ -97,6 +103,7 @@ const LAVA = {
     "tempDown": -1000,
     "uponTempUp": null,
     "uponTempDown": null,
+    "heatUponUP": 0,
     "product": null
 };
 const OIL = {
@@ -110,6 +117,21 @@ const OIL = {
     "tempDown": -1000,
     "uponTempUp": null,
     "uponTempDown": null,
+    "heatUponUP": 0,
+    "product": null
+};
+const BURNINGOIL = {
+    "life": 0,
+    "color": new Vec3(),
+    "behaviour": new Vec3(),
+    "stability": 0,
+    "density": 0,
+    "startTemp": 0,
+    "tempUp": 1000,
+    "tempDown": -1000,
+    "uponTempUp": null,
+    "uponTempDown": null,
+    "heatUponUP": 0,
     "product": null
 };
 
@@ -125,6 +147,7 @@ const ROCK = {
     "tempDown": -1000,
     "uponTempUp": null,
     "uponTempDown": null,
+    "heatUponUP": 0,
     "product": null
 };
 const WOOD = {
@@ -138,6 +161,21 @@ const WOOD = {
     "tempDown": -1000,
     "uponTempUp": null,
     "uponTempDown": null,
+    "heatUponUP": 0,
+    "product": null
+};
+const BURNINGWOOD = {
+    "life": 0,
+    "color": new Vec3(),
+    "behaviour": new Vec3(),
+    "stability": 0,
+    "density": 0,
+    "startTemp": 0,
+    "tempUp": 1000,
+    "tempDown": -1000,
+    "uponTempUp": null,
+    "uponTempDown": null,
+    "heatUponUP": 0,
     "product": null
 };
 const STONE = {
@@ -151,6 +189,7 @@ const STONE = {
     "tempDown": -1000,
     "uponTempUp": null,
     "uponTempDown": null,
+    "heatUponUP": 0,
     "product": null
 };
 const SAND = {
@@ -164,6 +203,7 @@ const SAND = {
     "tempDown": -1000,
     "uponTempUp": null,
     "uponTempDown": null,
+    "heatUponUP": 0,
     "product": null
 };
 const SOIL = {
@@ -177,6 +217,7 @@ const SOIL = {
     "tempDown": -1000,
     "uponTempUp": null,
     "uponTempDown": null,
+    "heatUponUP": 0,
     "product": null
 };
 const ICE = {
@@ -190,6 +231,7 @@ const ICE = {
     "tempDown": -1000,
     "uponTempUp": null,
     "uponTempDown": null,
+    "heatUponUP": 0,
     "product": null
 };
 
@@ -234,7 +276,7 @@ FIRE.startTemp = 1000;
 FIRE.tempUp = 11000;
 FIRE.tempDown = 200;
 FIRE.uponTempUp = PLASMA;
-FIRE.uponTempDown = SMOKE;
+FIRE.heatUponUP = 1000;
 
 /* VAPOUR */
 VAPOUR.life = -1;
@@ -255,8 +297,9 @@ GAS.stability = -1;
 GAS.density = -3;
 GAS.startTemp = 30;
 GAS.tempUp = 300;
-GAS.uponTempUp = PLASMA;
+GAS.uponTempUp = FIRE;
 GAS.product = SMOKE;
+GAS.heatUponUP = 100;
 
 /* SMOKE */
 SMOKE.life = -1;
@@ -284,7 +327,7 @@ LAVA.color = new Vec3(1, 0.5, 0);
 LAVA.behaviour = new Vec3(0, -1, 0);
 LAVA.stability = -1;
 LAVA.density = 5;
-LAVA.startTemp = 800;
+LAVA.startTemp = 1000;
 LAVA.tempUp = 1200;
 LAVA.tempDown = 600;
 LAVA.uponTempDown = STONE;
@@ -298,8 +341,18 @@ OIL.density = -1;
 OIL.startTemp = 30;
 OIL.tempUp = 200;
 OIL.tempDown = -50;
-OIL.uponTempUp = GAS;
-OIL.product = FIRE;
+OIL.uponTempUp = BURNINGOIL;
+OIL.heatUponUP = 800;
+
+/* BURNING OIL */
+BURNINGOIL.life = 50;
+BURNINGOIL.color = new Vec3(1, 0.1, 0.1);
+BURNINGOIL.behaviour = new Vec3(0, -1, 0);
+BURNINGOIL.stability = -1;
+BURNINGOIL.density = -1;
+BURNINGOIL.tempUp = 400;
+BURNINGOIL.uponTempUp = FIRE;
+// BURNINGOIL.heatUponUP = 800;
 
 /* ROCK */
 ROCK.life = -1;
@@ -308,7 +361,6 @@ ROCK.behaviour = new Vec3(0, 0, 0);
 ROCK.stability = 0;
 ROCK.density = 5;
 ROCK.startTemp = 30;
-ROCK.product = FIRE;
 
 /* WOOD */
 WOOD.life = -1;
@@ -318,8 +370,18 @@ WOOD.stability = 0;
 WOOD.density = 5;
 WOOD.startTemp = 30;
 WOOD.tempUp = 200;
-WOOD.uponTempUp = SMOKE;
-WOOD.product = FIRE;
+WOOD.uponTempUp = BURNINGWOOD;
+WOOD.heatUponUP = 400;
+
+/* BURNING WOOD */
+BURNINGWOOD.life = 200;
+BURNINGWOOD.color = new Vec3(1, 0.25, 0);
+BURNINGWOOD.behaviour = new Vec3(0, 0, 0);
+BURNINGWOOD.stability = 0;
+BURNINGWOOD.density = 5;
+BURNINGWOOD.tempUp = 800;
+BURNINGWOOD.uponTempUp = FIRE;
+// BURNINGWOOD.heatUponUP = 200;
 
 /* STONE */
 STONE.life = -1;
@@ -399,6 +461,7 @@ class Particle extends Renderable{
         let tempChange = Math.round(Math.random() * 4 - 2);
         this.tempUp += tempChange;
         this.tempDown += tempChange;
+        this.temperature = properties.startTemp;
     }
 
     SetProperties(properties){
@@ -407,11 +470,12 @@ class Particle extends Renderable{
         this.behaviour = properties.behaviour;
         this.stability = properties.stability;
         this.density = properties.density;
-        this.temperature = properties.startTemp;
+        // this.temperature = properties.startTemp;
         this.tempUp = properties.tempUp;
         this.tempDown = properties.tempDown;
         this.uponTempUp = properties.uponTempUp;
         this.uponTempDown = properties.uponTempDown;
+        this.heatUponUP = properties.heatUponUP;
         this.product = properties.product;
     }
 
@@ -422,6 +486,7 @@ class Particle extends Renderable{
             return false;
 
         if(this.uponTempUp && this.temperature > this.tempUp){
+            this.temperature += this.heatUponUP
             this.SetProperties(this.uponTempUp);
             this.UpdateBuffers(
                 [
@@ -454,6 +519,7 @@ class Particle extends Renderable{
                     ...this.color.vec
                 ]
             );
+
         }
 
         return true;

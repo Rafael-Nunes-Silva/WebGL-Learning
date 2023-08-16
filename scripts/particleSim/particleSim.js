@@ -61,7 +61,12 @@ var shader = null;
 
 var currentParticleType = WATER;
 var brushSize = 0;
-var temperature = 30;
+var paused = false;
+
+/* TODO
+Transform properties into a class
+make it so particles can become another upon death
+   TODO */
 
 window.addEventListener(
     "load",
@@ -134,13 +139,35 @@ function SetupControls(){
         function(e){
             brushSize = e.target.value;
         }
-    )
+    );
     // document.getElementById("Temperature").addEventListener(
     //     "change",
     //     function(e){
     //         temperature = e.target.value;
     //     }
-    // )
+    // );
+    document.getElementById("Pause").addEventListener(
+        "click",
+        function(e){
+            paused = true;
+        }
+    );
+    document.getElementById("Play").addEventListener(
+        "click",
+        function(e){
+            paused = false;
+        }
+    );
+    document.getElementById("Reset").addEventListener(
+        "click",
+        function(e){
+            for(let x = 0; x < resolution.vec[0]; x++){
+                for(let y = 0; y < resolution.vec[1]; y++){
+                    RemoveFromGrid(new Vec3(x, y, 0), false);
+                }
+            }
+        }
+    );
 
     document.getElementById("PLASMA").addEventListener(
         "click",
@@ -234,36 +261,38 @@ function SetupControls(){
     );
 }
 
-var lastTime = 0, deltaTime = 0;
 function Update(){
-    let currentTime = new Date().getTime() * 0.001;
-    deltaTime = currentTime - lastTime;
-    lastTime = currentTime;
-
     webglContext.clearColor(0.0, 0.0, 0.0, 1.0);
     webglContext.clear(webglContext.COLOR_BUFFER_BIT);
 
-    GetParticlesPos().forEach(function(particle){
-        particle.Draw();
-        CalculateTemperature(particle);
-        if(!particle.Update())
-            RemoveFromGrid(particle.position);
-        
-        MoveFromTo(particle.position, AddVec3(particle.position, particle.behaviour));
+    if(paused){
+        GetParticlesPos().forEach(function(particle){particle.Draw();});
+    }
+    else{
+        GetParticlesPos().forEach(function(particle){
+            particle.Draw();
+            if(!particle.Update())
+                RemoveFromGrid(particle.position);
+            
+            MoveFromTo(particle.position, AddVec3(particle.position, particle.behaviour));
+            CalculateTemperature(particle);
 
-        if(particle.behaviour.vec[1] > 0){
-            if(ParticlesBelow(particle.position) > particle.stability){
-                let dir = Math.round(Math.random() * 2 - 1);
-                MoveFromTo(particle.position, AddVec3(particle.position, new Vec3(dir, 0, 0)))
+            if(particle.behaviour.vec[1] > 0){
+                if(ParticlesBelow(particle.position) > particle.stability){
+                    let dir = Math.round(Math.random() * 2 - 1);
+
+                    MoveFromTo(particle.position, AddVec3(particle.position, new Vec3(dir, 0, 0)))
+                }
             }
-        }
-        else if(particle.behaviour.vec[1] < 0){
-            if(ParticlesAbove(particle.position) > particle.stability){
-                let dir = Math.round(Math.random() * 2 - 1);
-                MoveFromTo(particle.position, AddVec3(particle.position, new Vec3(dir, 0, 0)))
+            else if(particle.behaviour.vec[1] < 0){
+                if(ParticlesAbove(particle.position) > particle.stability){
+                    let dir = Math.round(Math.random() * 2 - 1);
+
+                    MoveFromTo(particle.position, AddVec3(particle.position, new Vec3(dir, 0, 0)))
+                }
             }
-        }
-    });
+        });
+    }
 
     requestAnimationFrame(Update);
 }
@@ -448,6 +477,18 @@ function SpaceToLeft(pos, translatePos = true){
 
     return space;
 }
+function HasSpaceAbove(pos, translatePos = true){
+    return !GetFromGrid(AddVec3(pos, new Vec3(0, 1, 0)), translatePos);
+}
+function HasSpaceBelow(pos, translatePos = true){
+    return !GetFromGrid(AddVec3(pos, new Vec3(0, -1, 0)), translatePos);
+}
+function HasSpaceToRight(pos, translatePos = true){
+    return !GetFromGrid(AddVec3(pos, new Vec3(1, 0, 0)), translatePos);
+}
+function HasSpaceToLeft(pos, translatePos = true){
+    return !GetFromGrid(AddVec3(pos, new Vec3(-1, 0, 0)), translatePos);
+}
 
 function CompareParticles(particleA, particleB){
     return particleA == particleB;
@@ -486,24 +527,76 @@ function CalculateTemperature(particle){
     let right = GetFromGrid(AddVec3(particle.position, new Vec3(1, 0, 0)));
     let left = GetFromGrid(AddVec3(particle.position, new Vec3(-1, 0, 0)));
 
-    if(below){
-        let temp = (below.temperature + particle.temperature) * 0.5;
-        below.temperature = temp;
-        particle.temperature = temp;
+    let dirX = Math.round(Math.random());
+    if(dirX > 0){
+        if(above){
+            let temp = (above.temperature + particle.temperature) * 0.5;
+            above.temperature = temp;
+            particle.temperature = temp;
+        }
+        if(below){
+            let temp = (below.temperature + particle.temperature) * 0.5;
+            below.temperature = temp;
+            particle.temperature = temp;
+        }
     }
-    if(right){
-        let temp = (right.temperature + particle.temperature) * 0.5;
-        right.temperature = temp;
-        particle.temperature = temp;
+    else{
+        if(below){
+            let temp = (below.temperature + particle.temperature) * 0.5;
+            below.temperature = temp;
+            particle.temperature = temp;
+        }
+        if(above){
+            let temp = (above.temperature + particle.temperature) * 0.5;
+            above.temperature = temp;
+            particle.temperature = temp;
+        }
     }
-    if(left){
-        let temp = (left.temperature + particle.temperature) * 0.5;
-        left.temperature = temp;
-        particle.temperature = temp;
+
+    let dirY = Math.round(Math.random());
+    if(dirY > 0){
+        if(right){
+            let temp = (right.temperature + particle.temperature) * 0.5;
+            right.temperature = temp;
+            particle.temperature = temp;
+        }
+        if(left){
+            let temp = (left.temperature + particle.temperature) * 0.5;
+            left.temperature = temp;
+            particle.temperature = temp;
+        }
     }
-    if(above){
-        let temp = (above.temperature + particle.temperature) * 0.5;
-        above.temperature = temp;
-        particle.temperature = temp;
+    else{
+        if(left){
+            let temp = (left.temperature + particle.temperature) * 0.5;
+            left.temperature = temp;
+            particle.temperature = temp;
+        }
+        if(right){
+            let temp = (right.temperature + particle.temperature) * 0.5;
+            right.temperature = temp;
+            particle.temperature = temp;
+        }
     }
+
+    // if(above){
+    //     let temp = (above.temperature + particle.temperature) * 0.5;
+    //     above.temperature = temp;
+    //     particle.temperature = temp;
+    // }
+    // if(below){
+    //     let temp = (below.temperature + particle.temperature) * 0.5;
+    //     below.temperature = temp;
+    //     particle.temperature = temp;
+    // }
+    // if(right){
+    //     let temp = (right.temperature + particle.temperature) * 0.5;
+    //     right.temperature = temp;
+    //     particle.temperature = temp;
+    // }
+    // if(left){
+    //     let temp = (left.temperature + particle.temperature) * 0.5;
+    //     left.temperature = temp;
+    //     particle.temperature = temp;
+    // }
 }
